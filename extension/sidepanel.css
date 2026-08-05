@@ -1,29 +1,41 @@
 /* ============================================================
-   Assignment Assistant — Premium Dark Theme
+   Assignment Solver — Slite Calm SaaS Design System
    ============================================================ */
 
 /* --- tokens --------------------------------------------------- */
 :root {
-  --bg:          #0a0a0f;
-  --bg-card:     rgba(255,255,255,0.025);
-  --bg-elevated: rgba(255,255,255,0.05);
-  --bg-input:    rgba(0,0,0,0.35);
-  --accent:      #6366f1;
-  --accent-alt:  #8b5cf6;
-  --accent-glow: rgba(99,102,241,0.15);
-  --success:     #10b981;
-  --error:       #ef4444;
-  --warning:     #f59e0b;
-  --fg:          #e2e8f0;
-  --fg-dim:      #475569;
-  --fg-muted:    #64748b;
-  --border:      rgba(255,255,255,0.06);
-  --border-focus:rgba(99,102,241,0.5);
-  --radius:      10px;
-  --radius-sm:   6px;
-  --font-display:'Space Grotesk', system-ui, sans-serif;
-  --font-body:   'Inter', system-ui, sans-serif;
-  --transition:  0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* palette */
+  --primary:        #F67748;
+  --primary-contrast: #FDFDFD;
+  --secondary:      #3F434A;
+  --neutral:        #F7F3EE;
+  --surface:        #FDFDFD;
+  --border:         #E5E7EB;
+  --muted:          #6F7680;
+  --success:        #4CA56A;
+  --warning:        #F2A93B;
+  --error:          #D64545;
+
+  /* semantic aliases */
+  --bg:             var(--neutral);
+  --fg:             var(--secondary);
+  --fg-muted:       var(--muted);
+  --card-bg:        var(--surface);
+  --accent:         var(--primary);
+  --accent-glow:    rgba(246, 119, 72, 0.12);
+
+  /* radii */
+  --radius-card:    8px;
+  --radius-input:   8px;
+  --radius-pill:    9999px;
+
+  /* typography */
+  --font-display:   'DM Serif Display', Georgia, serif;
+  --font-body:      'DM Sans', system-ui, -apple-system, sans-serif;
+
+  /* transitions */
+  --ease:           cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:     0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --- reset & base --------------------------------------------- */
@@ -33,26 +45,28 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.57;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* --- scrollbar ------------------------------------------------ */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--fg-dim); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
 /* --- header --------------------------------------------------- */
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 18px;
+  background: var(--neutral);
   border-bottom: 1px solid var(--border);
   position: relative;
   z-index: 2;
@@ -61,28 +75,29 @@ header {
 .logo {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   color: var(--fg);
 }
 
-.logo svg {
-  color: var(--accent);
+.logo-icon {
   flex-shrink: 0;
 }
 
-.logo span {
+.logo-text {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 400;
+  font-size: 20px;
+  color: var(--fg);
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 #toggle-settings {
   background: none;
   border: none;
-  color: var(--fg-muted);
-  padding: 6px;
-  border-radius: var(--radius-sm);
+  color: var(--muted);
+  padding: 8px;
+  border-radius: var(--radius-input);
   cursor: pointer;
   transition: color var(--transition), background var(--transition);
   display: flex;
@@ -92,16 +107,15 @@ header {
 
 #toggle-settings:hover {
   color: var(--fg);
-  background: var(--bg-elevated);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 /* --- settings panel ------------------------------------------- */
 #settings {
-  padding: 14px 16px;
+  padding: 18px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--surface);
+  animation: slideDown 0.25s var(--ease);
 }
 
 @keyframes slideDown {
@@ -109,60 +123,64 @@ header {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.setting-group { margin-bottom: 12px; }
+.setting-group { margin-bottom: 14px; }
 .setting-group:last-child { margin-bottom: 0; }
 
 #settings label {
   display: block;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--fg-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
   margin-bottom: 6px;
+  letter-spacing: 0.01em;
 }
 
 input, select {
   width: 100%;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--fg);
-  background: var(--bg-input);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  border-radius: var(--radius-input);
+  padding: 12px 14px;
   transition: border-color var(--transition), box-shadow var(--transition);
   appearance: none;
   -webkit-appearance: none;
+  line-height: 1.5;
 }
 
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236F7680' stroke-width='2'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 28px;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+input::placeholder {
+  color: var(--muted);
 }
 
 input:focus, select:focus {
   outline: none;
-  border-color: var(--border-focus);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .model-row {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .model-row select { flex: 1; }
 
 #refresh-models {
-  background: var(--bg-elevated);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--fg-muted);
-  padding: 6px 8px;
+  border-radius: var(--radius-input);
+  color: var(--muted);
+  padding: 8px 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -172,54 +190,57 @@ input:focus, select:focus {
 }
 
 #refresh-models:hover {
-  color: var(--fg);
-  border-color: var(--border-focus);
+  color: var(--primary);
+  border-color: var(--primary);
   background: var(--accent-glow);
 }
 
-/* --- mode toggle ---------------------------------------------- */
+/* --- mode toggle (pill segmented control) --------------------- */
 .seg {
   display: flex;
   gap: 4px;
-  padding: 10px 16px;
+  padding: 12px 18px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
 .seg button {
   flex: 1;
-  font-family: var(--font-display);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  padding: 7px 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  padding: 8px 0;
+  border: none;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--fg-muted);
   cursor: pointer;
   transition: all var(--transition);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .seg button:hover:not(.on) {
   color: var(--fg);
-  background: var(--bg-elevated);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .seg button.on {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
   font-weight: 600;
-  box-shadow: 0 0 16px var(--accent-glow), 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* --- status --------------------------------------------------- */
 .status {
   margin: 0;
-  padding: 10px 16px;
-  font-size: 12px;
+  padding: 10px 18px;
+  font-family: var(--font-body);
+  font-size: 14px;
   color: var(--fg-muted);
-  min-height: 18px;
+  min-height: 20px;
   border-bottom: 1px solid var(--border);
   transition: color var(--transition);
 }
@@ -233,10 +254,10 @@ input:focus, select:focus {
 /* --- actions -------------------------------------------------- */
 #actions {
   display: flex;
-  gap: 6px;
-  padding: 12px 16px;
+  gap: 8px;
+  padding: 14px 18px;
   border-top: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--neutral);
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -244,76 +265,77 @@ input:focus, select:focus {
 
 #actions button {
   flex: 1;
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  padding: 9px 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 19px;
+  height: 44px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   color: var(--fg);
   cursor: pointer;
   transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #actions button:hover:not(:disabled) {
-  background: var(--bg-card);
-  border-color: rgba(255,255,255,0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-color: var(--muted);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 #actions button:active:not(:disabled) {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 #actions button:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
   transform: none;
 }
 
-#actions button:first-child {
-  border-color: var(--accent);
-  color: var(--accent);
+/* Primary action (Answer) */
+#actions #solve {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
 }
 
-#actions button:first-child:hover:not(:disabled) {
-  background: var(--accent-glow);
-  border-color: var(--accent);
+#actions #solve:hover:not(:disabled) {
+  background: #e5683a;
+  border-color: #e5683a;
+  box-shadow: 0 2px 8px rgba(246, 119, 72, 0.25);
 }
 
 /* --- question list -------------------------------------------- */
 main {
   flex: 1;
-  padding: 8px 16px 16px;
+  padding: 12px 18px 18px;
   overflow-y: auto;
 }
 
 /* --- card ----------------------------------------------------- */
 .card {
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-card);
-  backdrop-filter: blur(8px);
-  padding: 14px;
+  border-radius: var(--radius-card);
+  background: var(--card-bg);
+  padding: 16px;
   margin-bottom: 10px;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color var(--transition), background var(--transition);
 }
 
 .card:hover {
-  border-color: rgba(255,255,255,0.1);
+  background: #FAFAF8;
 }
 
 .card.filled {
-  border-color: color-mix(in srgb, var(--success) 40%, var(--border));
-  box-shadow: 0 0 20px color-mix(in srgb, var(--success) 6%, transparent);
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
 }
 
 .card.failed {
   border-color: color-mix(in srgb, var(--error) 45%, var(--border));
-  box-shadow: 0 0 20px color-mix(in srgb, var(--error) 6%, transparent);
 }
 
 /* card header */
@@ -321,73 +343,72 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .num {
-  font-family: var(--font-display);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-glow);
-  padding: 2px 7px;
-  border-radius: 4px;
+  color: var(--fg-muted);
+  background: var(--neutral);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.3px;
 }
 
 .kind {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--fg-dim);
-  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 12px;
   font-weight: 500;
+  color: var(--muted);
+  margin-left: auto;
 }
 
 /* question text */
 .prompt {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--fg);
-  line-height: 1.6;
-  font-size: 13px;
+  line-height: 1.5;
+  font-size: 16px;
 }
 
 /* options */
 .opt {
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border-radius: var(--radius-input);
   border: 1px solid transparent;
   color: var(--fg-muted);
   display: flex;
   gap: 8px;
   align-items: flex-start;
   transition: all var(--transition);
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .opt.pick {
   color: var(--fg);
   background: var(--accent-glow);
-  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
 }
 
 .opt .mark {
-  color: var(--accent);
+  color: var(--primary);
   width: 12px;
   flex: none;
   font-weight: 600;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* fill-in-the-blank */
 .blank {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
-  font-size: 13px;
-  background: var(--bg-input);
+  font-size: 14px;
+  background: var(--neutral);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 7px 10px;
+  border-radius: var(--radius-input);
+  padding: 8px 12px;
   display: inline-block;
   color: var(--fg);
   max-width: 100%;
@@ -398,62 +419,53 @@ main {
 .meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  padding-top: 10px;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
 }
 
-/* --- confidence ring ------------------------------------------ */
-.conf-ring {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
+/* --- confidence bar ------------------------------------------- */
+.conf-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
 }
 
-.conf-ring svg {
-  width: 100%;
+.conf-track {
+  flex: 1;
+  height: 6px;
+  background: var(--neutral);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  max-width: 120px;
+}
+
+.conf-fill {
   height: 100%;
-  transform: rotate(-90deg);
+  background: var(--primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.6s var(--ease);
 }
-
-.conf-ring .ring-bg {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 3;
-}
-
-.conf-ring .ring-fill {
-  fill: none;
-  stroke: var(--success);
-  stroke-width: 3;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-              stroke 0.3s ease;
-}
-
-.conf-ring.mid .ring-fill { stroke: var(--warning); }
-.conf-ring.low .ring-fill { stroke: var(--error); }
 
 .pct {
-  font-family: var(--font-display);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 12px;
   font-weight: 500;
-  color: var(--fg-muted);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
-  min-width: 30px;
+  min-width: 32px;
 }
 
 /* badge */
 .badge {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 3px 8px;
-  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
 }
 
 .badge.ok {
@@ -469,31 +481,39 @@ main {
 /* fill-this button in meta */
 .meta button {
   margin-left: auto;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 18px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--primary);
+  color: var(--primary-contrast);
   cursor: pointer;
   transition: all var(--transition);
+  display: flex;
+  align-items: center;
 }
 
 .meta button:hover:not(:disabled) {
-  background: var(--accent-glow);
+  background: #e5683a;
+}
+
+.meta button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* details / reasoning */
 details {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 summary {
   cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: 14px;
   font-weight: 500;
   color: var(--fg-muted);
   transition: color var(--transition);
@@ -503,32 +523,33 @@ summary {
 summary:hover { color: var(--fg); }
 
 details[open] summary {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 details p {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--fg-muted);
-  line-height: 1.6;
+  line-height: 1.57;
 }
 
 /* empty state */
 .empty {
-  color: var(--fg-dim);
+  color: var(--muted);
   text-align: center;
-  padding: 40px 20px;
-  font-size: 13px;
-  font-family: var(--font-display);
-  letter-spacing: 0.1px;
+  padding: 48px 24px;
+  font-size: 18px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 /* --- footer --------------------------------------------------- */
 footer {
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-top: 1px solid var(--border);
-  color: var(--fg-dim);
-  font-size: 11px;
+  color: var(--muted);
+  font-size: 12px;
   text-align: center;
-  letter-spacing: 0.1px;
+  line-height: 1.4;
 }

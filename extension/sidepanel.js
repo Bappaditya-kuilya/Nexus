@@ -67,30 +67,16 @@ function stagger(nodes) {
 
 const KIND = { single_choice: "one answer", multi_choice: "select all", fill_blank: "fill in" };
 
-/** Confidence as an SVG ring with animated stroke. */
-function confidenceRing(value) {
+/** Confidence as a soft progress bar with coral fill on warm neutral track. */
+function confidenceBar(value) {
   const pct = Math.round((value ?? 0) * 100);
-  const r = 12, c = 2 * Math.PI * r;
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 30 30");
+  const track = el("div", { className: "conf-track" });
+  const fill = el("div", { className: "conf-fill", style: `width: ${pct}%` });
+  track.append(fill);
 
-  const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  bg.setAttribute("cx", "15"); bg.setAttribute("cy", "15"); bg.setAttribute("r", String(r));
-  bg.classList.add("ring-bg");
-
-  const fill = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  fill.setAttribute("cx", "15"); fill.setAttribute("cy", "15"); fill.setAttribute("r", String(r));
-  fill.classList.add("ring-fill");
-  fill.setAttribute("stroke-dasharray", String(c));
-  fill.setAttribute("stroke-dashoffset", String(c * (1 - pct / 100)));
-
-  svg.append(bg, fill);
-
-  const cls = pct < 50 ? "low" : pct < 75 ? "mid" : "";
-  const ring = el("div", { className: "conf-ring" + (cls ? " " + cls : "") }, svg);
-
-  return [ring, el("span", { className: "pct", textContent: `${pct}%` })];
+  const bar = el("div", { className: "conf-bar" }, track);
+  return [bar, el("span", { className: "pct", textContent: `${pct}%` })];
 }
 
 function card(q, index) {
@@ -122,7 +108,7 @@ function card(q, index) {
   );
 
   if (ans) {
-    const meta = el("div", { className: "meta" }, ...confidenceRing(ans.confidence));
+    const meta = el("div", { className: "meta" }, ...confidenceBar(ans.confidence));
 
     if (result !== undefined)
       meta.append(
