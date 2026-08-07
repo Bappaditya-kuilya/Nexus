@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Course: Developing Soft Skills and Leadership through Indian Knowledge System | SWAYAM</title>
+<!--
+  Reproduces the bug found on the live Swayam portal: question text sits OUTSIDE the
+  options' common ancestor, so the original promptOf() saw only the options and every
+  question came back "(no question text found)".
+
+  Two layouts, because the live DOM could be either:
+    A. per-question wrapper — options nested in their own div, text a sibling above it
+    B. flat — every question shares one parent, text merely precedes its options
+
+  A is fixed by climbing out of the options wrapper; B is fixed by the preceding-sibling
+  fallback, since climbing stops immediately (the shared parent holds other questions).
+-->
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 780px; margin: 40px auto; padding: 0 20px; }
+  .question-block { margin: 26px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 6px; }
+  .q-text { font-weight: 600; margin-bottom: 10px; }
+  .options-wrapper label { display: block; margin: 5px 0; }
+  .flat > p { font-weight: 600; margin: 24px 0 8px; }
+  .opts label { display: block; margin: 5px 0; }
+</style>
+
+<h1>Week 2 : Assignment 2</h1>
+
+<!-- Layout A: options nested one level deeper than the question text -->
+<div class="question-block">
+  <div class="q-text"><p>1) In the Bhagavad Gita, Arjuna's despondency is best described as what?</p></div>
+  <div class="options-wrapper">
+    <label><input type="radio" name="qa" value="0" /> Lack of physical strength</label>
+    <label><input type="radio" name="qa" value="1" /> Fear of the ocean</label>
+    <label><input type="radio" name="qa" value="2" /> A temporary loss of self-recognition</label>
+    <label><input type="radio" name="qa" value="3" /> Lack of strategic knowledge</label>
+  </div>
+</div>
+
+<div class="question-block">
+  <div class="q-text"><p>2) Self-awareness in the Indian Knowledge System primarily means what?</p></div>
+  <div class="options-wrapper">
+    <label><input type="radio" name="qb" value="0" /> Knowledge of professional skills</label>
+    <label><input type="radio" name="qb" value="1" /> Insight into the nature of the self</label>
+    <label><input type="radio" name="qb" value="2" /> Information about personality traits</label>
+    <label><input type="radio" name="qb" value="3" /> Mastery of social behaviour</label>
+  </div>
+</div>
+
+<!-- Layout B: one flat parent, question text merely precedes its own options -->
+<div class="flat">
+  <p>3) Which guna is associated with clarity, balance and harmony?</p>
+  <div class="opts">
+    <label><input type="radio" name="qc" value="0" /> Sattva</label>
+    <label><input type="radio" name="qc" value="1" /> Rajas</label>
+    <label><input type="radio" name="qc" value="2" /> Tamas</label>
+    <label><input type="radio" name="qc" value="3" /> Dharma</label>
+  </div>
+
+  <p>4) According to Patanjali, yoga is the intelligent regulation of what?</p>
+  <div class="opts">
+    <label><input type="radio" name="qd" value="0" /> Elimination of all thoughts</label>
+    <label><input type="radio" name="qd" value="1" /> Mental fluctuations (chitta vritti)</label>
+    <label><input type="radio" name="qd" value="2" /> Withdrawal from society</label>
+    <label><input type="radio" name="qd" value="3" /> Memorization of scriptures</label>
+  </div>
+
+  <p>5) Select every quality associated with sthitaprajna. Choose all that apply.</p>
+  <div class="opts">
+    <label><input type="checkbox" name="qe" value="0" /> Inner balance amid life's dualities</label>
+    <label><input type="checkbox" name="qe" value="1" /> Emotional excitement</label>
+    <label><input type="checkbox" name="qe" value="2" /> Ethical composure under shock</label>
+    <label><input type="checkbox" name="qe" value="3" /> Intellectual superiority</label>
+  </div>
+</div>

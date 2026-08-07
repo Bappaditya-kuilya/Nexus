@@ -1,0 +1,155 @@
+:root {
+  --bg: #0e0f11;
+  --panel: #16181c;
+  --line: #24272d;
+  --fg: #e7e9ee;
+  --dim: #9aa1ad;
+  --accent: #7aa2ff;
+  --good: #4ec98a;
+  --bad: #f2726f;
+  --warn: #e0b35c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+h1 { font-size: 13px; font-weight: 600; margin: 0; flex: 1; letter-spacing: .2px; }
+
+button {
+  font: inherit;
+  color: var(--fg);
+  background: #1e2127;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: #262a32; }
+button:disabled { opacity: .4; cursor: default; }
+button.icon { background: none; border: none; font-size: 15px; padding: 4px 6px; color: var(--dim); }
+button.ghost { background: none; }
+
+/* settings ---------------------------------------------------------------- */
+#settings {
+  padding: 12px 14px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+#settings label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--dim);
+  margin: 10px 0 5px;
+}
+#settings label:first-child { margin-top: 0; }
+
+input, select {
+  width: 100%;
+  font: inherit;
+  color: var(--fg);
+  background: #0f1114;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 9px;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+.row { display: flex; gap: 6px; }
+.row select { flex: 1; }
+.note { color: var(--dim); font-size: 11px; margin: 6px 0 0; }
+
+.seg { display: flex; gap: 4px; }
+.seg button { flex: 1; }
+.seg button.on { background: var(--accent); border-color: var(--accent); color: #0d1220; font-weight: 600; }
+
+/* actions ----------------------------------------------------------------- */
+#actions { display: flex; gap: 6px; padding: 10px 14px; }
+#actions button { flex: 1; }
+
+.status { margin: 0 14px; font-size: 12px; color: var(--dim); min-height: 18px; }
+.status.err { color: var(--bad); }
+
+/* question cards ---------------------------------------------------------- */
+main { flex: 1; padding: 6px 14px 16px; }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 11px 12px;
+  margin-bottom: 9px;
+}
+.card.filled { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+.card.failed { border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); }
+
+.head { display: flex; align-items: baseline; gap: 7px; margin-bottom: 6px; }
+.num { color: var(--dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+.kind { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; margin-left: auto; }
+.prompt { margin: 0 0 8px; }
+
+.opt {
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  color: var(--dim);
+  display: flex;
+  gap: 7px;
+}
+.opt.pick {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.opt .mark { color: var(--accent); width: 11px; flex: none; }
+
+.blank {
+  font-family: ui-monospace, monospace;
+  background: #0f1114;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 5px 8px;
+  display: inline-block;
+}
+
+.meta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+.conf { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.conf i { display: block; height: 100%; background: var(--good); }
+.conf.mid i { background: var(--warn); }
+.conf.low i { background: var(--bad); }
+.pct { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.meta button { padding: 3px 8px; font-size: 11px; }
+
+details { margin-top: 7px; }
+summary { cursor: pointer; color: var(--dim); font-size: 11px; }
+details p { margin: 6px 0 0; color: var(--dim); }
+
+.badge { font-size: 11px; }
+.badge.ok { color: var(--good); }
+.badge.no { color: var(--bad); }
+
+footer {
+  padding: 9px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.empty { color: var(--dim); text-align: center; padding: 28px 10px; }

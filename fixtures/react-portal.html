@@ -1,0 +1,119 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Week 3 : Assignment 3 (React fixture)</title>
+<!--
+  Offline stand-in for the current NPTEL portal, which is a React app.
+
+  Every input here is a CONTROLLED component: `checked`/`value` come from React
+  state. That is the point of the fixture. If the extension writes to the DOM
+  without React noticing, React re-renders and throws the write away — so a fill
+  that "looks" applied but never reached state fails visibly here.
+
+  The panel at the bottom prints React state, which is the source of truth.
+  DOM-vs-state disagreement means the applicator is broken.
+-->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
+  h1 { font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 12px; }
+  .q { margin: 28px 0; padding: 18px; border: 1px solid #e3e3e3; border-radius: 8px; }
+  .qtext { font-weight: 600; margin-bottom: 12px; }
+  label { display: block; margin: 6px 0; cursor: pointer; }
+  input[type="text"] { padding: 6px 10px; border: 1px solid #bbb; border-radius: 4px; width: 260px; }
+  #state { position: sticky; bottom: 0; background: #111; color: #6f6; padding: 14px 18px;
+           border-radius: 8px; font: 13px/1.5 ui-monospace, monospace; white-space: pre; margin-top: 40px; }
+  .hint { color: #666; font-size: 13px; }
+</style>
+
+<div id="root"></div>
+
+<script>
+  const h = React.createElement;
+  const { useState } = React;
+
+  // A tiny inline image so the fixture works with no network for the image itself.
+  const CHART =
+    "data:image/svg+xml;base64," +
+    btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120">
+      <rect width="240" height="120" fill="#f4f4f4"/>
+      <polyline points="10,110 60,70 110,85 160,30 230,15" fill="none" stroke="#c33" stroke-width="3"/>
+      <text x="10" y="20" font-size="13" font-family="sans-serif">Throughput vs load</text>
+    </svg>`);
+
+  function Assignment() {
+    const [s, setS] = useState({ q1: "", q2: [], q3: "", q4: "" });
+    const set = (k, v) => setS((p) => ({ ...p, [k]: v }));
+
+    const radio = (name, val, text) =>
+      h("label", { key: val }, [
+        h("input", {
+          key: "i",
+          type: "radio",
+          name,
+          value: val,
+          checked: s[name] === val,
+          onChange: () => set(name, val),
+        }),
+        " " + text,
+      ]);
+
+    const check = (val, text) =>
+      h("label", { key: val }, [
+        h("input", {
+          key: "i",
+          type: "checkbox",
+          name: "q2",
+          value: val,
+          checked: s.q2.includes(val),
+          onChange: () =>
+            set("q2", s.q2.includes(val) ? s.q2.filter((x) => x !== val) : [...s.q2, val]),
+        }),
+        " " + text,
+      ]);
+
+    return h("div", null, [
+      h("h1", { key: "h" }, "Week 3 : Assignment 3"),
+      h("p", { key: "d", className: "hint" }, "The due date for submitting this assignment has passed."),
+
+      h("div", { key: "q1", className: "q" }, [
+        h("div", { key: "t", className: "qtext" }, "1) Which of the following is the time complexity of binary search on a sorted array of n elements?"),
+        radio("q1", "a", "O(n)"),
+        radio("q1", "b", "O(log n)"),
+        radio("q1", "c", "O(n log n)"),
+        radio("q1", "d", "O(1)"),
+      ]),
+
+      h("div", { key: "q2", className: "q" }, [
+        h("div", { key: "t", className: "qtext" }, "2) Which of the following are stable sorting algorithms? Select all that apply."),
+        check("a", "Merge sort"),
+        check("b", "Quick sort"),
+        check("c", "Insertion sort"),
+        check("d", "Heap sort"),
+      ]),
+
+      h("div", { key: "q3", className: "q" }, [
+        h("div", { key: "t", className: "qtext" }, "3) The worst-case number of comparisons to find an element in a balanced BST with 1023 nodes is ______."),
+        h("input", {
+          key: "i",
+          type: "text",
+          value: s.q3,
+          onChange: (e) => set("q3", e.target.value),
+          placeholder: "your answer",
+        }),
+      ]),
+
+      h("div", { key: "q4", className: "q" }, [
+        h("div", { key: "t", className: "qtext" }, "4) Based on the graph shown below, what happens to throughput as load increases past the knee?"),
+        h("img", { key: "img", src: CHART, alt: "throughput vs load" }),
+        radio("q4", "a", "It increases without bound"),
+        radio("q4", "b", "It saturates and then degrades"),
+        radio("q4", "c", "It drops to zero immediately"),
+      ]),
+
+      h("div", { key: "s", id: "state" }, "React state (source of truth)\n" + JSON.stringify(s, null, 2)),
+    ]);
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(h(Assignment));
+</script>

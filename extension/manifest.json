@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "NPTEL Assignment Assistant",
+  "version": "0.1.0",
+  "description": "Reads assignment questions, answers them with your own Gemini API key, and fills them into the page. Never submits.",
+
+  "permissions": ["activeTab", "tabs", "storage", "sidePanel", "scripting"],
+  "host_permissions": [
+    "https://*.nptel.ac.in/*",
+    "https://*.swayam.gov.in/*",
+    "https://*.swayam2.ac.in/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "action": { "default_title": "Open assignment assistant" },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com"
+  }
+}

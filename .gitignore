@@ -1,0 +1,14 @@
+node_modules/
+backend/.venv/
+backend/__pycache__/
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+backend/.env
+*.db
+*.db-shm
+*.db-wal
+website/.next/
+website/.env.local
+website/node_modules/
+.env

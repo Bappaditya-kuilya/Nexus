@@ -1,0 +1,8 @@
+{
+  "name": "nptel-assignment-assistant",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/autofill.test.mjs"
+  }
+}

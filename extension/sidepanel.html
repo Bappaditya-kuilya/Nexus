@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Assignment Assistant</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header>
+    <h1>Assignment Assistant</h1>
+    <button id="toggle-settings" class="icon" title="Settings" aria-label="Settings">&#9881;</button>
+  </header>
+
+  <section id="settings" hidden>
+    <label for="key">Gemini API key</label>
+    <input id="key" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" />
+    <p class="note">Stored only in this browser. Every request goes straight from here to Google.</p>
+
+    <label for="model">Model</label>
+    <div class="row">
+      <select id="model"></select>
+      <button id="refresh-models" class="ghost">Refresh</button>
+    </div>
+
+    <label>Mode</label>
+    <div class="seg" role="radiogroup">
+      <button data-mode="solve" class="on" role="radio" aria-checked="true">Solve</button>
+      <button data-mode="hints" role="radio" aria-checked="false">Hints</button>
+    </div>
+    <p class="note">Hints explains the approach. Solve gives the answer outright.</p>
+  </section>
+
+  <div id="actions">
+    <button id="scan">Scan page</button>
+    <button id="solve">Answer</button>
+    <button id="fill" disabled>Fill page</button>
+  </div>
+
+  <p id="status" class="status"></p>
+  <main id="list"></main>
+
+  <footer>This never clicks Submit. Check the answers before you hand them in.</footer>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
