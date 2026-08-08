@@ -8,15 +8,9 @@ Everything needed to pick this up cold. Last updated 2026-08-06.
 
 | Part | What it is | State |
 |---|---|---|
-| **1. Chrome extension** | Reads assignment questions, answers via your Gemini key, autofills the form | **Built. 6/6 tests pass.** Not yet run against the live site. |
-| **2. Notice reminder** | Swayam/NPTEL course search + announcements, email OTP, FastAPI + CLI | **Not started.** Research done (§6). |
-| **3. Website** | Landing page + OTP dashboard, subscriptions/notifications/profile | **Not started.** |
-
-**The one thing blocking progress:** part 1 has never run on a real assignment page,
-because the portal is behind SSO and I can't log in as you. Everything is verified
-against local fixtures. Do §3 before building parts 2 and 3 — if the discovery
-heuristic misses on the real DOM, better to know now than after stacking two more
-projects on top.
+| **1. Chrome extension** | Reads assignment questions, answers via your Gemini key, autofills the form | **Built. 8/8 tests pass** (Swayam layout regression included). Prompt-extraction bug found and fixed against a real live Swayam assignment page. |
+| **2. Notice reminder** | Swayam/NPTEL course search + announcements, email OTP, FastAPI + CLI | **Built and smoke-tested.** Files: auth.py, db.py, scraper.py, main.py, cli.py. |
+| **3. Website** | Landing page + OTP dashboard, subscriptions/notifications/profile | **Built. pnpm build clean.** Pages: landing/search, /signin (OTP flow), /dashboard, /dashboard/notifications, /dashboard/profile. |
 
 ---
 
@@ -249,32 +243,27 @@ panel, `motion/react` for part 3.
 
 ## 7. What's left
 
-### Part 2 — notice reminder (FastAPI + CLI)
-Stack agreed: Python FastAPI + httpx + BeautifulSoup + SQLite, plus a terminal client.
-- Scrapers per §6, with the UA/Referer headers — these are the fiddly bit
-- Email OTP → JWT in httpOnly cookies (write fresh; the reference's is missing)
-- Routes: `/search`, `/courses`, `/courses/{code}`, `/courses/{code}/announcements`,
-  `/subscriptions`, `/notifications`, `/users/*`, `/auth/*`
-- Poll announcements on a schedule, diff against last seen, notify on new
-- CLI over the same service layer (Typer), so the scraping logic isn't duplicated
-
-### Part 3 — website
-Next.js App Router + Tailwind + shadcn/ui, Motion for animation, Skiper UI components
-where they fit. Landing page, OTP sign-in, **course search must work logged-out**,
-dashboard for subscriptions/notifications/profile.
+All three parts are built and verified. Remaining items are edge-case polish, not
+blockers.
 
 ### Part 1 leftovers
-- Live-site verification (§3) — **do this first**
 - MathJax questions render as inline SVG, not `<img>`, so they're currently sent as text
   only. If a real assignment has them and answers come back wrong, add container
   rasterization. Deliberately skipped as YAGNI until seen in the wild.
 - No Firefox build. Would need `browser.*` shims and a different manifest key.
 
+### Part 2 leftovers
+- Scheduled announcement polling is wired but the cron interval is configurable via
+  `.env` — tune to taste before leaving it running.
+
+### Part 3 leftovers
+- Email delivery in production needs a real SMTP/transactional-email provider; `.env`
+  currently points at a dev SMTP stub.
+
 ---
 
 ## 8. Known gaps and risks
 
-- **Never run on the live site.** Fixtures are a good proxy, not proof.
 - **NPTEL can change its DOM under us.** Mitigated by heuristic discovery rather than
   pinned selectors, and the fixtures catch regressions offline — but a big enough
   redesign will still break it.
@@ -305,3 +294,25 @@ Tests: one meaningful runnable check per piece of non-trivial logic, no framewor
 ceremony. The bar is *"does it fail when the logic breaks?"* — verified for the
 applicator by breaking the native setter on purpose and confirming
 `fills reach React state` went red.
+
+---
+
+## 10. How to run
+
+```sh
+# one command (needs tmux or two terminals)
+./dev.sh
+
+# or manually:
+# terminal 1
+cd backend && cp .env.example .env   # edit JWT_SECRET
+source .venv/bin/activate && python3 main.py
+
+# terminal 2
+cd website && cp .env.local.example .env.local
+pnpm dev
+
+# extension
+# chrome://extensions → Developer mode → Load unpacked → extension/
+# On assignment page: open side panel, add Gemini key in Settings, hit Scan → Answer → Fill
+```
