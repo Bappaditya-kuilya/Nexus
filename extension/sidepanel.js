@@ -67,13 +67,30 @@ function stagger(nodes) {
 
 const KIND = { single_choice: "one answer", multi_choice: "select all", fill_blank: "fill in" };
 
-function confidenceBar(value) {
+/** Confidence as an SVG ring with animated stroke. */
+function confidenceRing(value) {
   const pct = Math.round((value ?? 0) * 100);
-  const bar = el("div", { className: "conf" }, el("i"));
-  bar.firstChild.style.width = `${pct}%`;
-  if (pct < 50) bar.classList.add("low");
-  else if (pct < 75) bar.classList.add("mid");
-  return [bar, el("span", { className: "pct", textContent: `${pct}%` })];
+  const r = 12, c = 2 * Math.PI * r;
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 30 30");
+
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  bg.setAttribute("cx", "15"); bg.setAttribute("cy", "15"); bg.setAttribute("r", String(r));
+  bg.classList.add("ring-bg");
+
+  const fill = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  fill.setAttribute("cx", "15"); fill.setAttribute("cy", "15"); fill.setAttribute("r", String(r));
+  fill.classList.add("ring-fill");
+  fill.setAttribute("stroke-dasharray", String(c));
+  fill.setAttribute("stroke-dashoffset", String(c * (1 - pct / 100)));
+
+  svg.append(bg, fill);
+
+  const cls = pct < 50 ? "low" : pct < 75 ? "mid" : "";
+  const ring = el("div", { className: "conf-ring" + (cls ? " " + cls : "") }, svg);
+
+  return [ring, el("span", { className: "pct", textContent: `${pct}%` })];
 }
 
 function card(q, index) {
@@ -105,7 +122,7 @@ function card(q, index) {
   );
 
   if (ans) {
-    const meta = el("div", { className: "meta" }, ...confidenceBar(ans.confidence));
+    const meta = el("div", { className: "meta" }, ...confidenceRing(ans.confidence));
 
     if (result !== undefined)
       meta.append(
@@ -176,7 +193,7 @@ async function scan() {
   const blank = questions.filter((q) => !q.prompt || q.prompt.length < 10).length;
   status(
     `Found ${questions.length} question${questions.length > 1 ? "s" : ""}. Now hit Answer.` +
-      (blank ? ` ⚠ ${blank} had no readable question text.` : "")
+      (blank ? ` \u26A0 ${blank} had no readable question text.` : "")
   );
 }
 
