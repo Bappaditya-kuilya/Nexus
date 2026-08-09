@@ -9,8 +9,13 @@
  *   1. Questions don't exist at injection time -> waitForReact/settle.
  *   2. Setting .checked/.value directly doesn't reach React state -> fill().
  */
-if (!window.__nptelAssistant) {
-  window.__nptelAssistant = {}; // filled in at the bottom; also the re-injection guard
+// ponytail: WeakMap guard replaces window.__nptelAssistant for stealth.
+// Tests access the surface via globalThis.__assignmentSolver.
+if (!window.__assignmentSolverGuard) {
+  window.__assignmentSolverGuard = new WeakMap();
+}
+if (!window.__assignmentSolverGuard.get(document)) {
+  window.__assignmentSolverGuard.set(document, true);
 
   const QID = "data-nsolve-qid"; // on the question container
   const OID = "data-nsolve-oid"; // on each option's <input>
@@ -460,6 +465,15 @@ if (!window.__nptelAssistant) {
     return inputs.every((el) => el.checked === wanted.has(el.getAttribute(OID)));
   }
 
+  /** Clean all nsolve data attributes from the DOM after fill (stealth). */
+  function cleanStamps() {
+    document.querySelectorAll(`[${QID}], [${OID}], [${OPT}]`).forEach((el) => {
+      el.removeAttribute(QID);
+      el.removeAttribute(OID);
+      el.removeAttribute(OPT);
+    });
+  }
+
   async function apply(answers) {
     if (!document.querySelector(`[${OID}]`)) discover(); // re-render since extract wiped the stamps
     const results = [];
@@ -472,6 +486,7 @@ if (!window.__nptelAssistant) {
       results.push({ qid: ans.qid, ok });
       await tick(100); // lets the sidepanel animate progress
     }
+    cleanStamps(); // stealth: remove all data-nsolve-* attributes
     return results;
   }
 
@@ -520,9 +535,9 @@ if (!window.__nptelAssistant) {
     APPLY: (msg) => apply(msg.answers),
   };
 
-  // Also the surface test/autofill.test.mjs drives, which is why it's exported
-  // rather than kept in the closure.
-  Object.assign(window.__nptelAssistant, handlers, { discover });
+  // ponytail: test surface uses __assignmentSolver instead of __nptelAssistant (stealth).
+  Object.assign(window.__assignmentSolver || {}, handlers, { discover });
+  if (!window.__assignmentSolver) window.__assignmentSolver = { ...handlers, discover };
 
   // Absent when a test loads this file into a plain page.
   if (globalThis.chrome?.runtime?.id) {

@@ -73,7 +73,7 @@ copy(JSON.stringify({
     role: i.getAttribute('role'),
     label: (i.closest('label') || i.parentElement)?.innerText?.slice(0, 90)
   })),
-  found: window.__nptelAssistant ? window.__nptelAssistant.discover().length : 'not injected'
+  found: window.__assignmentSolver ? window.__assignmentSolver.discover().length : 'not injected'
 }, null, 2))
 ```
 

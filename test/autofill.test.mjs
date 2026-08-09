@@ -28,9 +28,9 @@ async function load(name) {
   return page;
 }
 
-const extract = (page) => page.evaluate(() => window.__nptelAssistant.EXTRACT());
+const extract = (page) => page.evaluate(() => window.__assignmentSolver.EXTRACT());
 const apply = (page, answers) =>
-  page.evaluate((a) => window.__nptelAssistant.APPLY({ answers: a }), answers);
+  page.evaluate((a) => window.__assignmentSolver.APPLY({ answers: a }), answers);
 
 /** Pick option indices for a choice question, or literal text for a blank. */
 const answer = (q, pick) =>
