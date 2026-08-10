@@ -44,9 +44,8 @@ manifest.sidebar_action = {
 // Drop "sidePanel" from permissions (Firefox doesn't know it)
 manifest.permissions = manifest.permissions.filter((p) => p !== "sidePanel");
 
-// Background: Firefox MV3 supports both service_worker and scripts
+// Background: Firefox MV3 uses scripts only, no service_worker
 manifest.background = {
-  service_worker: "background.js",
   scripts: ["background.js"],
 };
 
@@ -55,6 +54,10 @@ manifest.browser_specific_settings = {
   gecko: {
     id: "nexus@assignment-solver",
     strict_min_version: "109.0",
+    data_collection_permissions: {
+      isExempt: true,
+      description: "Nexus only sends assignment questions to the user's own Gemini API key. No data is collected by the extension.",
+    },
   },
 };
 
