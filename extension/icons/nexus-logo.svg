@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="flow" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F67748"/>
+      <stop offset="100%" stop-color="#E85D30"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background (Chrome Web Store style) -->
+  <rect width="128" height="128" rx="20" fill="#ffffff"/>
+
+  <!-- Connection curve between the two nodes -->
+  <path
+    d="M 34 34 C 34 62 62 62 94 94"
+    stroke="url(#flow)"
+    stroke-width="12"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Top-left node (source/question) -->
+  <circle cx="34" cy="34" r="20" fill="#F67748"/>
+
+  <!-- Bottom-right node (destination/answer) -->
+  <circle cx="94" cy="94" r="16" fill="#E85D30"/>
+</svg>

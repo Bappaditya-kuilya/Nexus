@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Connection curve -->
+  <path
+    d="M 8.5 8.5 C 8.5 15.5 15.5 15.5 23.5 23.5"
+    stroke="#F67748"
+    stroke-width="3"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <!-- Top-left node -->
+  <circle cx="8.5" cy="8.5" r="5" fill="#F67748"/>
+  <!-- Bottom-right node -->
+  <circle cx="23.5" cy="23.5" r="4" fill="#E85D30"/>
+</svg>
