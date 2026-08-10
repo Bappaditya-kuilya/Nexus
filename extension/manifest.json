@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nexus",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Reads assignment questions, answers them with your own Gemini API key, and fills them into the page. Works on any website.",
 
   "permissions": ["activeTab", "tabs", "storage", "sidePanel", "scripting"],
