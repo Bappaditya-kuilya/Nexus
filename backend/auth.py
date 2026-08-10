@@ -20,7 +20,7 @@ def _send_otp(email: str, code: str):
     import smtplib, ssl
     from email.message import EmailMessage
     msg = EmailMessage()
-    msg["Subject"] = "Your NPTEL Assistant login code"
+    msg["Subject"] = "Your Nexus login code"
     msg["From"]    = os.environ.get("SMTP_FROM", "noreply@example.com")
     msg["To"]      = email
     msg.set_content(f"Your one-time code is: {code}\n\nExpires in {OTP_TTL} minutes.")

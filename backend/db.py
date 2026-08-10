@@ -4,7 +4,7 @@ ponytail: no ORM, no migrations tool. Schema is one CREATE TABLE IF NOT EXISTS p
 """
 import sqlite3, os, contextlib, threading
 
-DB_PATH = os.environ.get("NPTEL_DB", "data.db")
+DB_PATH = os.environ.get("NEXUS_DB", "data.db")
 _local = threading.local()
 
 def conn() -> sqlite3.Connection:

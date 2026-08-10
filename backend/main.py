@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr
 
 import db, auth, scraper
 
-app = FastAPI(title="NPTEL Notice Reminder")
+app = FastAPI(title="Nexus Notice Reminder")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[os.environ.get("CORS_ORIGIN", "http://localhost:3000")],

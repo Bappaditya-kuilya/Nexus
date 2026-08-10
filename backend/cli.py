@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import typer
 import db, scraper
 
-app = typer.Typer(help="NPTEL course notice reminder")
+app = typer.Typer(help="Nexus course notice reminder")
 
 def run(coro):
     return asyncio.get_event_loop().run_until_complete(coro)
