@@ -168,7 +168,7 @@ function syncButtons() {
 
 async function scan() {
   status("Waiting for the page to finish rendering…");
-  const { questions, title } = await send("EXTRACT");
+  const { questions } = await send("EXTRACT");
   state.questions = questions;
   state.answers.clear();
   state.results.clear();

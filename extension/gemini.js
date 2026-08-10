@@ -83,7 +83,7 @@ export async function listModels(apiKey) {
     .sort();
 }
 
-function buildParts(questions, mode) {
+function buildParts(questions) {
   const compact = questions.map(({ qid, type, prompt, options }) => ({ qid, type, prompt, options }));
   const parts = [
     {
@@ -111,7 +111,7 @@ export async function solve({ apiKey, model = DEFAULT_MODEL, questions, mode = "
   // schema already pins the shape.
   const body = {
     systemInstruction: { parts: [{ text: SYSTEM[mode] || SYSTEM.solve }] },
-    contents: [{ role: "user", parts: buildParts(questions, mode) }],
+    contents: [{ role: "user", parts: buildParts(questions) }],
     generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA },
   };
 

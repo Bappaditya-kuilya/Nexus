@@ -4,5 +4,11 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/autofill.test.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.1",
+    "globals": "^17.9.0",
+    "playwright": "^1.62.1"
   }
 }
