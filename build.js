@@ -53,10 +53,9 @@ manifest.background = {
 manifest.browser_specific_settings = {
   gecko: {
     id: "nexus@assignment-solver",
-    strict_min_version: "109.0",
+    strict_min_version: "140.0",
     data_collection_permissions: {
-      isExempt: true,
-      description: "Nexus only sends assignment questions to the user's own Gemini API key. No data is collected by the extension.",
+      required: ["none"],
     },
   },
 };
