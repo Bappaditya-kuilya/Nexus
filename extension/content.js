@@ -496,7 +496,7 @@ if (!window.__assignmentSolverGuard.get(document)) {
 
   /** Diagnostic dump when extraction finds 0 questions. */
   function diagnosticDump() {
-    console.log("[Assignment Solver] Diagnostic dump:", {
+    console.log("[Nexus] Diagnostic dump:", {
       url: location.href,
       title: document.title,
       inputs: [...document.querySelectorAll("input, textarea, select")].map((i) => ({

@@ -228,7 +228,7 @@ test("Chrome loads the unpacked extension without errors", async () => {
     await page.goto(panel);
     await page.waitForTimeout(1000);
 
-    assert.equal(await page.title(), "Assignment Assistant");
+    assert.equal(await page.title(), "Nexus");
     assert.deepEqual(
       await page.$$eval("#actions button", (b) => b.map((x) => x.textContent)),
       ["Scan page", "Answer", "Fill page"]

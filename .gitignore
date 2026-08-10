@@ -1,14 +1,46 @@
+# Dependencies
 node_modules/
+package-lock.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# Python
 backend/.venv/
 backend/__pycache__/
-backend/*.db
-backend/*.db-shm
-backend/*.db-wal
-backend/.env
+*.pyc
+*.pyo
+
+# Database
 *.db
 *.db-shm
 *.db-wal
-website/.next/
-website/.env.local
-website/node_modules/
+
+# Environment
 .env
+backend/.env
+website/.env.local
+
+# Build outputs
+website/.next/
+website/out/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Misc
+*.log
+coverage/
