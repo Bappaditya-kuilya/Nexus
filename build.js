@@ -58,9 +58,6 @@ manifest.browser_specific_settings = {
       required: ["none"],
     },
   },
-  gecko_android: {
-    strict_min_version: "142.0",
-  },
 };
 
 // Action button (keep it; Firefox shows it in the toolbar)
