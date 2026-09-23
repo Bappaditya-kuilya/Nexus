@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>SPA route-swap quiz fixture</title>
+<!--
+  Simulates an SPA route change without React: the initial render shows two
+  questions (sp1, sp2) inside #quiz-container. After 500ms a script replaces
+  the container's innerHTML with two different questions (sp3, sp4). Old nodes
+  are removed and new ones inserted — exercises the debounced re-discover path.
+
+  Expected before swap: 2 questions; after swap (>500ms): 2 different questions.
+-->
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 12px; }
+  .q { margin: 26px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 6px; }
+  .qtext { font-weight: 600; margin-bottom: 10px; }
+  label { display: block; margin: 5px 0; cursor: pointer; }
+  .hint { color: #666; font-size: 13px; }
+</style>
+
+<h1>Week 5 : Quiz (SPA swap)</h1>
+<p class="hint">Questions swap automatically after 500ms.</p>
+
+<div id="quiz-container">
+  <div class="q">
+    <p class="qtext">1) Which sorting algorithm is stable by default?</p>
+    <label><input type="radio" name="sp1" value="0" /> Selection sort</label>
+    <label><input type="radio" name="sp1" value="1" /> Merge sort</label>
+    <label><input type="radio" name="sp1" value="2" /> Quick sort</label>
+  </div>
+
+  <div class="q">
+    <p class="qtext">2) What is the base of the natural logarithm?</p>
+    <label><input type="radio" name="sp2" value="0" /> 10</label>
+    <label><input type="radio" name="sp2" value="1" /> e</label>
+    <label><input type="radio" name="sp2" value="2" /> π</label>
+  </div>
+</div>
+
+<script>
+  setTimeout(function () {
+    document.getElementById("quiz-container").innerHTML =
+      '<div class="q">' +
+      '<p class="qtext">1) Which layer of the OSI model handles routing?</p>' +
+      '<label><input type="radio" name="sp3" value="0" /> Data link</label>' +
+      '<label><input type="radio" name="sp3" value="1" /> Network</label>' +
+      '<label><input type="radio" name="sp3" value="2" /> Transport</label>' +
+      "</div>" +
+      '<div class="q">' +
+      '<p class="qtext">2) What does SQL stand for?</p>' +
+      '<label><input type="radio" name="sp4" value="0" /> Structured Query Language</label>' +
+      '<label><input type="radio" name="sp4" value="1" /> Simple Query Logic</label>' +
+      '<label><input type="radio" name="sp4" value="2" /> Sequential Query Language</label>' +
+      "</div>";
+  }, 500);
+</script>

@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Iframe inner quiz</title>
+<!--
+  Lives inside iframe-form.html. Two questions: one 3-radio single-choice group
+  (f1) and one free-text question.
+
+  Expected: 2 questions.
+-->
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; color: #1a1a1a; margin: 16px; }
+  .q { margin: 20px 0; padding: 14px; border: 1px solid #e0e0e0; border-radius: 6px; }
+  .qtext { font-weight: 600; margin-bottom: 8px; }
+  label { display: block; margin: 5px 0; cursor: pointer; }
+  input[type="text"] { padding: 6px 10px; border: 1px solid #bbb; border-radius: 4px; width: 240px; }
+</style>
+
+<div class="q">
+  <p class="qtext">1) Which protocol is connection-oriented?</p>
+  <label><input type="radio" name="f1" value="0" /> UDP</label>
+  <label><input type="radio" name="f1" value="1" /> TCP</label>
+  <label><input type="radio" name="f1" value="2" /> ICMP</label>
+</div>
+
+<div class="q">
+  <p class="qtext">2) A process is a ______ instance of a program in execution.</p>
+  <input type="text" name="f2" placeholder="your answer" />
+</div>

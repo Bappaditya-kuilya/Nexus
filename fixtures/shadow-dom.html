@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Shadow DOM quiz fixture</title>
+<!--
+  Two custom elements each attach a shadow root holding one single-choice question.
+  The light DOM (#app) contains only the custom-element hosts — no radios in the
+  top-level document. Discovery that does not traverse open shadow roots finds
+  zero questions; traversal that does finds 2, both single_choice.
+
+  Expected: 2 questions (s1, s2), both single_choice.
+-->
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 12px; }
+</style>
+
+<h1>Week 1 : Quiz (shadow DOM)</h1>
+
+<div id="app">
+  <x-quiz-one></x-quiz-one>
+  <x-quiz-two></x-quiz-two>
+</div>
+
+<script>
+  function defineQuiz(tag, prompt, name, options) {
+    customElements.define(tag, class extends HTMLElement {
+      connectedCallback() {
+        if (this.shadowRoot) return;
+        const root = this.attachShadow({ mode: "open" });
+        const wrap = document.createElement("div");
+        const p = document.createElement("p");
+        p.textContent = prompt;
+        wrap.appendChild(p);
+        options.forEach((text, i) => {
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = name;
+          input.value = String(i);
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(" " + text));
+          wrap.appendChild(label);
+        });
+        root.appendChild(wrap);
+      }
+    });
+  }
+
+  defineQuiz("x-quiz-one", "1) Which data structure uses FIFO ordering?", "s1",
+    ["Stack", "Queue", "Binary tree", "Hash map"]);
+  defineQuiz("x-quiz-two", "2) What does HTTP stand for?", "s2",
+    ["HyperText Transfer Protocol", "High Transfer Text Protocol",
+     "Hyperlink Transmission Protocol", "Hosted Text Transfer Process"]);
+</script>
