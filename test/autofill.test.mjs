@@ -198,6 +198,76 @@ test("legacy Course Builder fixture works through the same code path", async () 
   await page.close();
 });
 
+// ------------------------------------------------------- shadow DOM discovery
+
+test("shadow DOM: EXTRACT finds both single_choice questions with options", async () => {
+  const page = await load("shadow-dom.html");
+  const { questions } = await extract(page);
+
+  assert.equal(questions.length, 2, "should pierce open shadow roots");
+  for (const q of questions) {
+    assert.equal(q.type, "single_choice");
+    assert.ok(q.prompt.length > 10, `prompt too short: ${JSON.stringify(q.prompt)}`);
+    assert.ok(q.options.length > 0, `no options for ${q.qid}`);
+  }
+
+  await page.close();
+});
+
+// ------------------------------------------------------- image-only options
+
+test("image options: reads option text from img alt, not bare digits", async () => {
+  const page = await load("image-options.html");
+  const { questions } = await extract(page);
+
+  assert.equal(questions.length, 3);
+  assert.match(questions[0].options[0].text, /Option A/);
+  assert.match(questions[0].options[1].text, /Option B/);
+  assert.match(questions[0].options[2].text, /Option C/);
+  assert.match(questions[1].options[0].text, /Diagram/);
+
+  for (const q of questions)
+    for (const o of q.options)
+      assert.ok(!/^\d+$/.test(o.text), `option text is a bare digit: ${JSON.stringify(o.text)}`);
+
+  await page.close();
+});
+
+// ------------------------------------------------------------- SPA route swap
+
+test("SPA swap: re-discovers the replacement questions after the DOM mutates", async () => {
+  const page = await load("spa-swap.html");
+  const before = await extract(page);
+  assert.equal(before.questions.length, 2);
+  assert.match(before.questions[0].prompt, /sorting/i);
+  assert.match(before.questions[1].prompt, /natural log/i);
+
+  await page.waitForTimeout(700);
+  const after = await extract(page);
+  assert.equal(after.questions.length, 2);
+  assert.match(after.questions[0].prompt, /OSI/i);
+  assert.match(after.questions[1].prompt, /SQL/i);
+
+  assert.notDeepEqual(
+    after.questions.map((q) => q.prompt),
+    before.questions.map((q) => q.prompt),
+    "prompts did not change after the swap"
+  );
+
+  await page.close();
+});
+
+// -------------------------------------------------------- iframe origin policy
+
+test("iframe on file://: top-doc EXTRACT returns 0 (opaque origin)", async () => {
+  // file:// frames are opaque — discovery cannot cross into them. Served over
+  // http:// same-origin, the same fixture finds the 2 questions inside.
+  const page = await load("iframe-form.html");
+  const { questions } = await extract(page);
+  assert.equal(questions.length, 0, "file:// iframe must stay invisible to top-doc EXTRACT");
+  await page.close();
+});
+
 // --------------------------------------------------------------------- smoke
 
 test("Chrome loads the unpacked extension without errors", async () => {

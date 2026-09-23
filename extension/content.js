@@ -26,6 +26,19 @@ if (!window.__assignmentSolverGuard.get(document)) {
   const isVisible = (el) =>
     el.offsetParent !== null || el.getBoundingClientRect().height > 0;
 
+  function allRoots(root = document) {
+    const roots = [root];
+    for (const el of root.querySelectorAll("*")) {
+      if (el.shadowRoot) roots.push(...allRoots(el.shadowRoot));
+    }
+    return roots;
+  }
+  function sameOriginFrames() {
+    return [...document.querySelectorAll("iframe")]
+      .map((f) => { try { return f.contentDocument; } catch { return null; } })
+      .filter(Boolean);
+  }
+
   /** Lowest common ancestor of a set of nodes. */
   function lca(nodes) {
     let a = nodes[0];
@@ -131,14 +144,26 @@ if (!window.__assignmentSolverGuard.get(document)) {
   }
 
   /** Group radios/checkboxes into questions. Radios group by `name` — that's what makes them a group. */
-  function groupControls(sel) {
+  function groupControls(sel, root) {
     const groups = new Map();
-    for (const el of [...document.querySelectorAll(sel)].filter(isVisible)) {
+    for (const el of [...root.querySelectorAll(sel)].filter(isVisible)) {
       const key = el.name ? `n:${el.name}` : containerKey(el, sel);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(el);
     }
     return [...groups.values()];
+  }
+
+  let promptCounts, collectingPrompts;
+
+  function isNavText(t) {
+    if (!t) return false;
+    if (/^(question|page|step|quiz|unit|lesson|module)\s*\d+(\s*(of|\/)\s*\d+)?$/i.test(t))
+      return true;
+    const s = t.replace(/\s+/g, "");
+    if (s.length && [...s].filter((c) => /[0-9\p{P}\p{S}]/u.test(c)).length / s.length > 0.8)
+      return true;
+    return t.length < 25 && (promptCounts?.get(t)?.size || 0) >= 3;
   }
 
   /** Container text minus the option labels — i.e. the question itself. */
@@ -151,7 +176,12 @@ if (!window.__assignmentSolverGuard.get(document)) {
       const t = n.nodeValue.trim();
       if (t) parts.push(t);
     }
-    return clean(parts.join(" "));
+    const prompt = clean(parts.join(" "));
+    if (collectingPrompts) {
+      if (!promptCounts.has(prompt)) promptCounts.set(prompt, new Set());
+      promptCounts.get(prompt).add(container);
+    } else if (isNavText(prompt)) return "";
+    return prompt;
   }
 
   const CONTROLS = "input[type=radio],input[type=checkbox]";
@@ -191,6 +221,23 @@ if (!window.__assignmentSolverGuard.get(document)) {
     return "";
   }
 
+  const imgText = (node) => {
+    const img = node?.querySelector("img");
+    return clean(img?.alt || img?.title);
+  };
+
+  function optionText(label, el) {
+    // img before value: value is always non-empty ("0","1",...) so as a
+    // short-circuit it shadowed alt on image-only labels.
+    return (
+      clean(label?.innerText || label?.textContent) ||
+      imgText(label) ||
+      clean(el.placeholder) ||
+      clean(el.value) ||
+      "[image: review manually]"
+    );
+  }
+
   function buildChoiceQuestion(inputs, type) {
     const labels = inputs.map(labelOf).filter(Boolean);
     inputs.forEach((el, i) => el.setAttribute(OID, `${type[0]}${i}`));
@@ -206,7 +253,7 @@ if (!window.__assignmentSolverGuard.get(document)) {
       prompt: prompt.length > 10 ? prompt : precedingText(container) || prompt,
       options: inputs.map((el, i) => ({
         oid: el.getAttribute(OID),
-        text: clean(labels[i]?.innerText || labels[i]?.textContent || el.value),
+        text: optionText(labels[i], el),
       })),
     };
   }
@@ -226,7 +273,8 @@ if (!window.__assignmentSolverGuard.get(document)) {
    * ponytail: treat as fill_blank — the answer text is the option value to select.
    */
   function buildSelectQuestion(sel) {
-    const options = [...sel.options].filter((o) => o.value && o.text.trim());
+    const optText = (o) => clean(o.text) || imgText(o);
+    const options = [...sel.options].filter((o) => o.value && optText(o));
     const container = blankContainer(sel);
     const prompt = promptOf(container, []);
 
@@ -237,7 +285,7 @@ if (!window.__assignmentSolverGuard.get(document)) {
       prompt,
       options: options.map((o, i) => ({
         oid: `s${i}`,
-        text: clean(o.text),
+        text: optText(o),
       })),
     };
   }
@@ -246,10 +294,10 @@ if (!window.__assignmentSolverGuard.get(document)) {
    * ponytail: brute-force fallback — find repeated structure (multiple similar
    * containers with text + inputs) when standard discovery finds nothing.
    */
-  function discoverFallback() {
+  function discoverFallback(root) {
     const questions = [];
 
-    const allDivs = [...document.querySelectorAll("div, section, article, li, fieldset")];
+    const allDivs = [...root.querySelectorAll("div, section, article, li, fieldset")];
     const containers = allDivs.filter((el) => {
       const inputs = el.querySelectorAll("input, textarea, select");
       const text = clean(el.innerText);
@@ -311,19 +359,18 @@ if (!window.__assignmentSolverGuard.get(document)) {
     return questions;
   }
 
-  function discover() {
-    containerSeq = 0;
+  function discoverIn(root) {
     const questions = [];
 
     // Tier 1 — control-type grouping. This is what fires on the current React portal.
-    for (const g of groupControls("input[type=radio]"))
+    for (const g of groupControls("input[type=radio]", root))
       questions.push(buildChoiceQuestion(g, "single_choice"));
-    for (const g of groupControls("input[type=checkbox]"))
+    for (const g of groupControls("input[type=checkbox]", root))
       questions.push(buildChoiceQuestion(g, "multi_choice"));
 
     // Tier 2 — native <select> dropdowns not inside a choice question.
     const claimed = questions.map((q) => q.container);
-    const selects = [...document.querySelectorAll("select")]
+    const selects = [...root.querySelectorAll("select")]
       .filter((el) => isVisible(el) && !claimed.some((c) => c.contains(el)));
     for (const sel of selects) {
       questions.push(buildSelectQuestion(sel));
@@ -332,7 +379,7 @@ if (!window.__assignmentSolverGuard.get(document)) {
     // Tier 3 — free-text controls not already inside a choice question.
     const allClaimed = questions.map((q) => q.container);
     const blanks = [
-      ...document.querySelectorAll("input[type=text],input:not([type]),textarea"),
+      ...root.querySelectorAll("input[type=text],input:not([type]),textarea"),
     ].filter((el) => isVisible(el) && !allClaimed.some((c) => c.contains(el)));
 
     for (const el of blanks) {
@@ -349,8 +396,28 @@ if (!window.__assignmentSolverGuard.get(document)) {
 
     // Tier 4 — fallback: repeated structure detection for unknown page layouts
     if (questions.length === 0) {
-      questions.push(...discoverFallback());
+      questions.push(...discoverFallback(root));
     }
+
+    return questions;
+  }
+
+  function discover() {
+    containerSeq = 0;
+    const roots = [...new Set([document, ...sameOriginFrames()].flatMap((d) => allRoots(d)))];
+    // pass 1: collect prompt candidates so isNavText can count verbatim repeats
+    promptCounts = new Map();
+    collectingPrompts = true;
+    for (const root of roots) discoverIn(root);
+    collectingPrompts = false;
+    const questions = [];
+    const seen = new Set();
+    for (const root of roots)
+      for (const q of discoverIn(root))
+        if (!seen.has(q.container)) {
+          seen.add(q.container);
+          questions.push(q);
+        }
 
     // Page order, so question numbers match what the student sees.
     questions.sort((a, b) =>
@@ -541,6 +608,22 @@ if (!window.__assignmentSolverGuard.get(document)) {
 
   // Absent when a test loads this file into a plain page.
   if (globalThis.chrome?.runtime?.id) {
+    let rescanTimer;
+    const rescanObs = new MutationObserver((muts) => {
+      const material = muts.some(
+        (m) => m.addedNodes.length || m.removedNodes.length
+      );
+      if (!material) return;
+      clearTimeout(rescanTimer);
+      rescanTimer = setTimeout(() => {
+        if (!document.querySelector(`[${QID}]`)) {
+          discover();
+          // re-stamp + notify sidepanel if it's open is handled by its next EXTRACT
+        }
+      }, 400);
+    });
+    if (document.body) rescanObs.observe(document.body, { childList: true, subtree: true });
+
     chrome.runtime.onMessage.addListener((msg, _sender, send) => {
       const h = handlers[msg?.type];
       if (!h) return;
