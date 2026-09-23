@@ -2,25 +2,27 @@
 
 # Nexus
 
-A browser extension that scans assignment pages, answers questions with Gemini, and fills them in for you.
+A browser extension that reads assignment questions on the page, explains them with your choice of AI model, and optionally fills the answers. Your API keys, your browser, nothing submitted without you.
 
-**Chrome** · **Brave** · **Edge** · **Firefox**
+**Chrome · Brave · Edge · Firefox** · [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/nexus-solver/)
 
 ---
 
-## What is this?
+## What it does
 
-You open an assignment. Nexus reads every question — MCQs, checkboxes, text fields, dropdowns — sends them to Gemini using *your own* API key, and fills the answers into the form. It never submits anything. You review, then hit submit yourself.
+Open an assignment page, hit **Scan**. Nexus finds every MCQ, checkbox, text field, and dropdown, then you pick how to use it:
 
-Works on any site with standard HTML forms: NPTEL, Swayam, Canvas, Blackboard, Moodle, Google Forms, or whatever your university cooked up.
+| Mode | What you get | Touches the form? |
+|---|---|---|
+| **Explain** | Concept and approach per question, opened on demand | No |
+| **Solve** | Answers with confidence, optional fill into the fields | Fill only when you click it |
+| **Chat** | Ask follow-ups about any question in a sidebar thread | No |
 
-Two modes:
-- **Solve** — answers and fills
-- **Hints** — explains the approach, no filling (for when you actually want to learn)
+Nothing is ever submitted for you. Review, then hit submit yourself.
+
+Works on any page with standard HTML forms: NPTEL, Swayam, Canvas, Blackboard, Moodle, Google Forms, and custom university portals.
 
 ## Install
-
-### The quick version
 
 ```sh
 git clone https://github.com/Bappaditya-kuilya/Nexus.git
@@ -28,75 +30,92 @@ cd Nexus
 node build.js
 ```
 
-Then load `dist/chrome/` (or `dist/firefox/`) as an unpacked extension in your browser.
+**Chrome / Brave / Edge:** `chrome://extensions` → Developer mode on → Load unpacked → `dist/chrome/`
 
-### Chrome / Brave / Edge
+**Firefox (local):** `about:debugging#/runtime/this-firefox` → Load Temporary Add-on → any file in `dist/firefox/`
 
-All three are Chromium. Same steps for all.
+**Firefox (permanent):** install from [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/nexus-solver/)
 
-1. Go to `chrome://extensions` (or `brave://extensions` or `edge://extensions`)
-2. Turn on **Developer mode**
-3. Click **Load unpacked** → select `dist/chrome/`
-4. Pin the extension to your toolbar
+### API keys (bring your own)
 
-### Firefox
+Nexus never runs on our servers. You paste your own keys in Settings (gear icon); they stay in `chrome.storage.local` on your machine.
 
-1. Go to `about:debugging#/runtime/this-firefox`
-2. Click **Load Temporary Add-on** → pick any file in `dist/firefox/`
+1. **Gemini** — free key from [Google AI Studio](https://aistudio.google.com/apikey)
+2. **Groq** (optional fallback) — key from [console.groq.com](https://console.groq.com/keys)
 
-Heads up: temporary add-ons disappear when Firefox closes. For a permanent install, it's on [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/nexus/) (submitting now).
-
-### API key
-
-You need a free Gemini API key. Takes 30 seconds.
-
-1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
-2. Create a key
-3. Click the Nexus icon → gear icon → paste it in
+Developers can pre-fill both in a local `.env` (copy `.env.example`) before `node build.js`; end users only ever see the Settings fields.
 
 ## Usage
 
 1. Open an assignment page
-2. Click **Nexus** in your toolbar
-3. **Scan page** — finds all questions
-4. **Answer** — Gemini answers them (shows confidence per question)
-5. **Fill page** — writes answers into the form
-6. Check the low-confidence ones, then submit
+2. Click **Nexus** → **Scan**
+3. Pick a mode: **Explain**, **Solve**, or type into **Chat**
+4. In Solve mode: **Answer** shows model output with a confidence bar; **Fill page** writes into the form when you ask it to
+5. In Explain mode: click a question, read the approach, answer it yourself
 
-## How it works (if you're curious)
+## Test results
 
-Most NPTEL extensions break because they hardcode CSS selectors like `.qt-mc-question`. When the site redesigns, they're dead.
+Full suite run on 2026-09-23, after the extraction-hardening / dual-provider / chat build:
 
-Nexus doesn't do that. It groups radio buttons by their `name` attribute (that's literally what makes them a radio group), climbs the DOM to find question text, and falls back to structure detection for unknown layouts. One code path handles React portals, legacy Course Builder pages, and anything else with standard HTML forms.
+| Suite | Command | Result |
+|---|---|---|
+| Page extraction + fill (Playwright) | `npm test` | **12 / 12 pass** |
+| Gemini → Groq fallback | `node --test test/groq-fallback.test.mjs` | **4 / 4 pass** |
+| Chat endpoint contract | `node --test test/chat.test.mjs` | **4 / 4 pass** |
+| Lint | `npx eslint extension/` | **0 errors, 0 warnings** |
+| **Total** | | **20 / 20 tests green** |
 
-The fill is the tricky part. Setting `input.checked = true` directly doesn't work on React apps — React keeps a tracker on the node and reverts your change on the next render. Nexus goes through the native prototype setter and dispatches proper events so React actually picks it up.
+What those 12 Playwright tests actually assert (not smoke tests):
 
-No build step. No bundler. Plain JS, HTML, CSS. Loads straight from disk.
+- **React state, not just DOM.** Fills on the React fixture are checked against React’s internal controlled-component state. A fill that only sets `input.checked` passes a DOM check and then gets reverted on the next render; this suite fails that.
+- **Extraction counts and text quality** on 7 layouts: React portal (4 questions), Swayam (5), legacy Course Builder (3), web-component shadow DOM (2), image-only options (3, read from `img[alt]`), SPA route swap (2 before → 2 after mid-test), same-origin iframe (0 on `file://` by browser origin policy, 2 over `http://`).
+- **Zero short prompts** across every fixture (`prompt.length < 10` count = 0).
+- **Hints mode never mutates.** Same page, same code path: Explain-style payload leaves `input:checked` at 0 → 0 while Solve moves it 0 → 3. Chat replies only render in the sidebar.
+- **No submit path.** A dedicated test scans the extension surface and fails if anything clicks a submit control.
+
+## Why it holds up where others break
+
+| Failure mode in typical assignment helpers | Nexus behavior | Where it’s enforced |
+|---|---|---|
+| Hardcoded selectors (`.qt-mc-question`) die on redesign | Groups radios by `name` (the HTML semantics of a radio group), climbs the DOM for prompt text, structural fallback for unknown layouts | `content.js` discovery tiers 1–4 |
+| Misses questions inside widgets | Traverses open shadow roots and same-origin iframes | `allRoots()` / `sameOriginFrames()` |
+| Picks up “Question 5 of 10” as the prompt | Rejects nav-like and repeated chrome text before accepting a prompt | `isNavText()` filter |
+| Image-only options come back as `""` or the input value `"0"` | Reads `img[alt]` / `img[title]`, else marks the option for manual review | `optionText()` |
+| SPA swaps the quiz without a reload; sidebar goes stale | Debounced re-scan on added/removed nodes (400ms, ignores typing) | `MutationObserver` in `content.js` |
+| Fill looks fine for a frame, React reverts it | Native prototype setter + `input`/`change` events + `rAF` flush; test asserts React state | `setValue()` / `fillOne()` |
+| One provider down, extension dead | Auto-fallback Gemini → Groq on any failure; honest combined error if both fail | `solve()` / `chat()` in `gemini.js` |
+| Keys shipped in the repo or sent to a third party | BYOK only: keys live in local extension storage, sent only to the provider you chose | Settings + `chrome.storage.local` |
+| Auto-submits graded work | No submit call exists; test fails if one appears | `test/autofill.test.mjs` |
+
+Chat and Solve share extraction and the provider fallback; Explain mode strips option IDs before display and blocks the fill function at its only caller.
 
 ## Project structure
 
 ```
-extension/          The extension (load this in your browser)
-  content.js        Finds questions, fills answers
-  gemini.js         One Gemini API call, structured JSON response
-  sidepanel.*       The UI
-  background.js     Opens the sidebar (3 lines)
-  icons/            Logo
-dist/               Built output (node build.js)
-  chrome/           Chrome, Brave, Edge
-  firefox/          Firefox
-build.js            Generates dist/ from extension/
-fixtures/           Test HTML pages
-test/               Playwright tests
+extension/          Source (load via build output, not directly)
+  content.js        Discovery, extraction, fill — no submit
+  gemini.js         Gemini + Groq clients, solve() and chat()
+  sidepanel.*       UI: scan, modes, chat, settings
+  defaults.js       Empty key stub; build fills from .env
+  background.js     Opens the side panel
+dist/               node build.js output (chrome/ + firefox/)
+fixtures/           7 test layouts (React, Swayam, GCB, shadow, iframe, images, SPA)
+test/               Playwright suite + provider/chat unit tests
+build.js            Copies extension/ → dist/, rewrites Firefox manifest, injects .env keys
+.env.example        GEMINI_API_KEY / GROQ_API_KEY template
 ```
 
-## Test
+## Development
 
 ```sh
+npm ci
+npx playwright install chromium
 npm test
+npx eslint extension/
+node build.js
 ```
 
-8 tests. The important one: fills reach React state, not just the DOM. A fill that only mutates the DOM looks fine for a frame and then React reverts it. The test asserts against React's internal state to catch exactly that.
+CI (GitHub Actions) runs the same install → test → lint path on every push and PR to `main`.
 
 ## License
 
