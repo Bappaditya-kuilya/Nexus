@@ -28,6 +28,15 @@ mkdirSync(firefoxDir, { recursive: true });
 cpSync(src, chromeDir, { recursive: true });
 cpSync(src, firefoxDir, { recursive: true });
 
+// ---- defaults.js: inject keys from root .env -------------------------
+
+const defaults = parseEnv(join(__dirname, ".env"));
+for (const dir of [chromeDir, firefoxDir]) {
+  writeFileSync(join(dir, "defaults.js"), `window.__NEXUS_DEFAULTS = ${JSON.stringify(defaults)};\n`);
+}
+console.log(`Gemini key: ${defaults.geminiKey ? "found" : "missing"}`);
+console.log(`Groq key:   ${defaults.groqKey ? "found" : "missing"}`);
+
 // ---- Firefox manifest.json ------------------------------------------
 
 const manifest = JSON.parse(readFileSync(join(firefoxDir, "manifest.json"), "utf8"));
@@ -98,6 +107,29 @@ console.log("Chrome:  load dist/chrome/   via chrome://extensions (Developer mod
 console.log("Firefox: load dist/firefox/  via about:debugging#/runtime/this-firefox");
 
 // ---- helpers --------------------------------------------------------
+
+/** Minimal .env reader: KEY=VALUE lines, # comments, trimmed, optional quotes. */
+function parseEnv(path) {
+  const out = { geminiKey: "", groqKey: "" };
+  let text;
+  try {
+    text = readFileSync(path, "utf8");
+  } catch {
+    return out; // no .env → empty stub
+  }
+  const map = { GEMINI_API_KEY: "geminiKey", GROQ_API_KEY: "groqKey" };
+  for (const line of text.split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/);
+    if (!m) continue; // comment/blank/malformed — regex rejects '#' lines
+    const key = map[m[1]];
+    if (!key) continue;
+    let v = m[2].trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))
+      v = v.slice(1, -1);
+    out[key] = v;
+  }
+  return out;
+}
 
 function rmrf(p) {
   try {
