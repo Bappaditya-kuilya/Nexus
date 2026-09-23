@@ -41,6 +41,14 @@
         </button>
       </div>
     </div>
+    <div class="setting-group">
+      <label for="groq-key">Groq API Key (fallback)</label>
+      <input id="groq-key" type="password" placeholder="Optional — used when Gemini fails..." autocomplete="off" spellcheck="false">
+    </div>
+    <div class="setting-group">
+      <label for="groq-model">Groq Model</label>
+      <input id="groq-model" type="text" placeholder="llama-3.3-70b-versatile" autocomplete="off" spellcheck="false">
+    </div>
   </div>
 
   <!-- Mode toggle (always visible) -->
@@ -55,6 +63,13 @@
   <!-- Question list -->
   <main id="list"></main>
 
+  <!-- Global chat (session-only) -->
+  <section id="chat" aria-live="polite"></section>
+  <div id="chat-bar">
+    <input id="chat-input" placeholder="Ask about a question… or mention Q3" autocomplete="off" spellcheck="false">
+    <button id="chat-send">Send</button>
+  </div>
+
   <!-- Action bar (sticky bottom) -->
   <div id="actions">
     <button id="scan">Scan page</button>
@@ -64,6 +79,7 @@
 
   <footer>This never clicks Submit. Review answers before handing in.</footer>
 
+  <script src="defaults.js"></script>
   <script type="module" src="sidepanel.js"></script>
 </body>
 </html>

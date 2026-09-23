@@ -251,6 +251,95 @@ input:focus, select:focus {
 
 .status.err { color: var(--error); }
 
+/* --- chat ------------------------------------------------------ */
+#chat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+#chat:empty {
+  display: none;
+}
+
+.msg {
+  max-width: 88%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card-bg);
+  padding: 8px 12px;
+  align-self: flex-start;
+}
+
+.msg.me {
+  align-self: flex-end;
+  background: var(--accent-glow);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+}
+
+.msg .who {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.msg.me .who {
+  color: var(--primary);
+}
+
+.msg p {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#chat-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--neutral);
+}
+
+#chat-input {
+  flex: 1;
+}
+
+#chat-send {
+  height: 44px;
+  padding: 0 19px;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#chat-send:hover:not(:disabled) {
+  background: #e5683a;
+  border-color: #e5683a;
+  box-shadow: 0 2px 8px rgba(246, 119, 72, 0.25);
+}
+
+#chat-send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* --- actions -------------------------------------------------- */
 #actions {
   display: flex;
@@ -323,7 +412,9 @@ main {
   background: var(--card-bg);
   padding: 16px;
   margin-bottom: 10px;
-  transition: border-color var(--transition), background var(--transition);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition),
+    box-shadow var(--transition);
 }
 
 .card:hover {
@@ -336,6 +427,13 @@ main {
 
 .card.failed {
   border-color: color-mix(in srgb, var(--error) 45%, var(--border));
+}
+
+/* selected for chat context — sits after filled/failed so the outline wins */
+.card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--surface);
 }
 
 /* card header */
