@@ -26,6 +26,17 @@
     </button>
   </header>
 
+  <!-- First-run key setup -->
+  <div id="setup" hidden>
+    <p class="setup-title">Set up your Gemini key</p>
+    <p class="setup-hint">Paste a free key from Google AI Studio — it never leaves your browser.</p>
+    <div class="setup-row">
+      <input id="setup-key" type="password" placeholder="Gemini API key…" autocomplete="off" spellcheck="false">
+      <button id="setup-test">Test key</button>
+    </div>
+    <span id="setup-msg" class="setup-msg"></span>
+  </div>
+
   <!-- Settings panel (slides down) -->
   <div id="settings" hidden>
     <div class="setting-group">
@@ -57,6 +68,10 @@
     <button data-mode="hints" role="radio" aria-checked="false">Hints</button>
   </div>
 
+  <div class="list-tools">
+    <button id="sort-conf" aria-pressed="false" title="Show least-confident answers first">Confidence ↑</button>
+  </div>
+
   <!-- Status -->
   <p id="status" class="status"></p>
 
@@ -75,6 +90,7 @@
     <button id="scan">Scan page</button>
     <button id="solve">Answer</button>
     <button id="fill">Fill page</button>
+    <button id="export">Export</button>
   </div>
 
   <footer>This never clicks Submit. Review answers before handing in.</footer>

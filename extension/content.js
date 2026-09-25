@@ -199,7 +199,9 @@ if (!window.__assignmentSolverGuard.get(document)) {
       // Absorbing another question's inputs means we've gone one level too far.
       if ([...node.querySelectorAll(CONTROLS)].some((c) => !inputs.includes(c))) break;
       widest = node;
-      if (promptOf(node, labels).length > 10) return node;
+      const p = promptOf(node, labels);
+      if (p.length > 10) return node;
+      if (!p && stemImageOf(node, labels)) return node;
       node = node.parentElement;
     }
     return widest;
@@ -226,6 +228,10 @@ if (!window.__assignmentSolverGuard.get(document)) {
     return clean(img?.alt || img?.title);
   };
 
+  /** The question stem image: an <img> in the container that is not an option label's. */
+  const stemImageOf = (container, labels) =>
+    [...container.querySelectorAll("img")].find((i) => !labels.some((l) => l.contains(i))) || null;
+
   function optionText(label, el) {
     // img before value: value is always non-empty ("0","1",...) so as a
     // short-circuit it shadowed alt on image-only labels.
@@ -244,13 +250,18 @@ if (!window.__assignmentSolverGuard.get(document)) {
     labels.forEach((l) => l.setAttribute(OPT, ""));
 
     const container = questionContainer(inputs, labels);
-    const prompt = promptOf(container, labels);
+    let prompt = promptOf(container, labels);
+    if (prompt.length <= 10) {
+      const img = stemImageOf(container, labels);
+      if (img) prompt = clean(img.alt || img.title) || "[Question image]";
+      else prompt = precedingText(container) || prompt;
+    }
 
     return {
       type,
       container,
       inputs,
-      prompt: prompt.length > 10 ? prompt : precedingText(container) || prompt,
+      prompt,
       options: inputs.map((el, i) => ({
         oid: el.getAttribute(OID),
         text: optionText(labels[i], el),
@@ -276,7 +287,11 @@ if (!window.__assignmentSolverGuard.get(document)) {
     const optText = (o) => clean(o.text) || imgText(o);
     const options = [...sel.options].filter((o) => o.value && optText(o));
     const container = blankContainer(sel);
-    const prompt = promptOf(container, []);
+    let prompt = promptOf(container, []);
+    if (prompt.length <= 10) {
+      const img = stemImageOf(container, []);
+      if (img) prompt = clean(img.alt || img.title) || "[Question image]";
+    }
 
     return {
       type: "fill_blank",

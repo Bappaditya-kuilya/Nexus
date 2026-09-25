@@ -38,7 +38,7 @@ node build.js
 
 ### API keys (bring your own)
 
-Nexus never runs on our servers. You paste your own keys in Settings (gear icon); they stay in `chrome.storage.local` on your machine.
+Nexus never runs on our servers. On first open with no key, the panel asks you to paste a Gemini key — **Test key** runs a live `listModels` call and saves it to local storage. You can also paste or change keys anytime in Settings (gear icon); they stay in `chrome.storage.local` on your machine.
 
 1. **Gemini** — free key from [Google AI Studio](https://aistudio.google.com/apikey)
 2. **Groq** (optional fallback) — key from [console.groq.com](https://console.groq.com/keys)
@@ -47,11 +47,14 @@ Developers can pre-fill both in a local `.env` (copy `.env.example`) before `nod
 
 ## Usage
 
-1. Open an assignment page
-2. Click **Nexus** → **Scan**
-3. Pick a mode: **Explain**, **Solve**, or type into **Chat**
-4. In Solve mode: **Answer** shows model output with a confidence bar; **Fill page** writes into the form when you ask it to
-5. In Explain mode: click a question, read the approach, answer it yourself
+1. Open an assignment page — the side panel **scans automatically on open**; hit **Scan** to re-run it manually
+2. Pick a mode: **Explain**, **Solve**, or type into **Chat**
+3. In Solve mode: **Answer** shows model output with a confidence bar; **Fill page** writes into the form when you ask it to
+4. In Explain mode: click a question, read the approach, answer it yourself
+
+Also in Solve mode: **Confidence ↑** reorders cards least-confident-first so you review the shaky ones first · **↻** on any answered card re-answers just that question · **Export** copies all Q→A pairs as plain text to the clipboard.
+
+**Session persistence:** solved answers are saved per page URL (last 10) and restored when you reopen the same page, as long as the question IDs match.
 
 ## Test results
 

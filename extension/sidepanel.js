@@ -14,6 +14,8 @@ const state = {
   answers: new Map(), // qid -> answer
   results: new Map(), // qid -> bool
   mode: "solve",
+  url: "", // page the current questions came from — key for answer persistence
+  sortLow: false, // session-only: lowest-confidence answers first
   selectedQid: null, // card picked for chat context
   chat: [], // session-only {role, content} — dies with the panel
 };
@@ -129,6 +131,34 @@ function card(q, index) {
       const btn = el("button", { textContent: "Fill this" });
       btn.onclick = () => guard(btn, "…", () => fill([q.qid]));
       meta.append(btn);
+
+      const retry = el("button", {
+        textContent: "↻",
+        title: "Re-answer this question",
+        "aria-label": "Re-answer Q",
+      });
+      retry.onclick = (e) => {
+        e.stopPropagation(); // card click selects the card — don't also toggle it
+        guard(retry, "…", async () => {
+          const { answers, provider } = await solve({
+            apiKey: apiKey(),
+            model: $("model").value || DEFAULT_MODEL,
+            groqKey: groqKey(),
+            groqModel: groqModel(),
+            questions: [q],
+            mode: "solve",
+          });
+          const a = answers[0];
+          if (!a) throw new Error("No answer came back — try again.");
+          state.answers.set(q.qid, a);
+          state.results.delete(q.qid);
+          await saveAnswers(state.url);
+          render();
+          syncButtons();
+          status(`Re-answered via ${provider}.`);
+        });
+      };
+      meta.append(retry);
     }
     node.append(meta);
 
@@ -169,7 +199,19 @@ function render() {
     return;
   }
 
-  const cards = state.questions.map(card);
+  // Lowest-confidence first; unanswered get confidence 1 so they sink. Original
+  // indices ride along so Q-numbers don't renumber when sorted.
+  const cards =
+    state.sortLow && state.answers.size
+      ? [...state.questions]
+          .map((q, i) => ({ q, i }))
+          .sort(
+            (a, b) =>
+              (state.answers.get(a.q.qid)?.confidence ?? 1) -
+              (state.answers.get(b.q.qid)?.confidence ?? 1)
+          )
+          .map(({ q, i }) => card(q, i))
+      : state.questions.map(card);
   cards.forEach((c) => list.append(c));
   stagger(cards);
 }
@@ -178,6 +220,7 @@ function syncButtons() {
   $("solve").disabled = false; // scans first if you haven't
   $("fill").disabled = !state.answers.size || state.mode !== "solve";
   $("fill").hidden = state.mode !== "solve";
+  $("export").disabled = !state.answers.size;
 }
 
 /** Chat replies render here only — never on the page. */
@@ -198,22 +241,50 @@ function renderChat() {
 
 // ------------------------------------------------------------------- actions
 
-async function scan() {
-  status("Waiting for the page to finish rendering…");
-  const { questions } = await send("EXTRACT");
+async function scan({ auto = false } = {}) {
+  if (!auto) status("Waiting for the page to finish rendering…");
+  const { questions, url } = await send("EXTRACT");
+  state.url = url;
   state.questions = questions;
   state.answers.clear();
   state.results.clear();
   state.selectedQid = null;
+
+  // Same page, same questions → bring back the answers from last time.
+  const h = (await store.get({ answersByUrl: {} })).answersByUrl;
+  const e = url && h[url];
+  let restored = 0;
+  if (e && questions.length && e.qids === questions.map((q) => q.qid).join("|")) {
+    state.answers = new Map(e.answers.map((a) => [a.qid, a]));
+    restored = state.answers.size;
+  }
+
   render();
   syncButtons();
-  if (!questions.length) return status("No questions found on this page.");
+  if (!questions.length) return auto ? status("") : status("No questions found on this page.");
 
   const blank = questions.filter((q) => !q.prompt || q.prompt.length < 10).length;
   status(
     `Found ${questions.length} question${questions.length > 1 ? "s" : ""}. Now hit Answer.` +
+      (restored ? ` Restored ${restored} saved answers.` : "") +
       (blank ? ` \u26A0 ${blank} had no readable question text.` : "")
   );
+}
+
+/** Persist solve-mode answers per URL so a panel reload doesn't lose them. */
+async function saveAnswers(url) {
+  if (!url || !state.answers.size) return;
+  const entry = {
+    t: Date.now(),
+    qids: state.questions.map((q) => q.qid).join("|"),
+    answers: [...state.answers.values()],
+  };
+  const h = (await store.get({ answersByUrl: {} })).answersByUrl;
+  h[url] = entry;
+  const keep = Object.entries(h)
+    .sort((a, b) => b[1].t - a[1].t)
+    .slice(0, 10);
+  await store.set({ answersByUrl: Object.fromEntries(keep) });
 }
 
 // The field is the source of truth, not storage: reading storage here used to race the
@@ -245,6 +316,7 @@ async function answer() {
 
   state.answers = new Map(stripped.map((a) => [a.qid, a]));
   state.results.clear();
+  if (state.mode === "solve") await saveAnswers(state.url); // hints never persist
   render();
   syncButtons();
 
@@ -370,6 +442,56 @@ async function loadModels() {
   $("refresh-models").onclick = (e) =>
     guard(e.target, "…", () => loadModels().then(() => status("Model list updated.")));
 
+  // First-run onboarding: prove the key before asking the user to trust it.
+  $("setup-test").onclick = () =>
+    guard($("setup-test"), "Testing…", async () => {
+      const msg = $("setup-msg");
+      msg.textContent = "";
+      msg.classList.remove("err");
+      const key = $("setup-key").value.trim();
+      if (!key) throw new Error("Paste a Gemini API key first.");
+      try {
+        const names = await listModels(key);
+        await store.set({ geminiKey: key });
+        $("key").value = key; // apiKey() reads the field — one source of truth
+        $("setup").hidden = true;
+        await loadModels().catch(() => {});
+        status(`Key works — ${names.length} models available.`);
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.classList.add("err");
+      }
+    });
+
+  $("sort-conf").onclick = () => {
+    state.sortLow = !state.sortLow;
+    $("sort-conf").setAttribute("aria-pressed", String(state.sortLow));
+    render();
+  };
+
+  $("export").onclick = async () => {
+    if (!state.answers.size) return status("Nothing to export yet — hit Answer first.", true);
+    const lines = [];
+    state.questions.forEach((q, i) => {
+      const a = state.answers.get(q.qid);
+      if (!a) return;
+      const text =
+        q.type === "fill_blank"
+          ? a.text || ""
+          : q.options
+              .filter((o) => (a.oids || []).includes(o.oid))
+              .map((o) => o.text)
+              .join(", ");
+      lines.push(`Q${i + 1}: ${q.prompt}`, `    → ${text}`);
+    });
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      status(`Copied ${state.answers.size} answers to clipboard.`);
+    } catch (err) {
+      status(err.message, true);
+    }
+  };
+
   $("scan").onclick = (e) => guard(e.target, "Scanning…", scan);
   $("solve").onclick = (e) => guard(e.target, "Thinking…", answer);
   $("fill").onclick = (e) => guard(e.target, "Filling…", () => fill());
@@ -378,8 +500,13 @@ async function loadModels() {
     if (e.key === "Enter") $("chat-send").click();
   };
 
-  if (!saved.geminiKey) $("settings").hidden = false;
+  if (!saved.geminiKey) {
+    $("settings").hidden = false;
+    $("setup").hidden = false; // no key anywhere (defaults already merged above)
+  }
   await loadModels().catch(() => {});
   render();
   syncButtons();
+  // Auto-scan: silent if the page has nothing (or chrome:// won't let us in).
+  scan({ auto: true }).catch(() => status(""));
 })();

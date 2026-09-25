@@ -9,7 +9,7 @@
 const API = "https://generativelanguage.googleapis.com/v1beta";
 const GROQ = "https://api.groq.com/openai/v1";
 
-export const DEFAULT_MODEL = "gemini-flash-latest";
+export const DEFAULT_MODEL = "gemini-3.1-flash-lite";
 export const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
 
 // Gemini's responseSchema is an OpenAPI subset. Keep it flat.
@@ -218,6 +218,12 @@ export async function solve({
     };
   } catch (geminiErr) {
     if (!groqKey) throw geminiErr;
+    if (questions.some((q) => q.prompt === "[Question image]")) {
+      throw new Error(
+        `Gemini: ${geminiErr.message.replace(/\.$/, "")}. Groq can't read image-only questions (text-only fallback). Check the Gemini key under Settings.`,
+        { cause: geminiErr }
+      );
+    }
     try {
       const answers = await groqSolve({ groqKey, groqModel, questions, mode });
       return { answers, provider: "Groq (Gemini down)" };
@@ -284,10 +290,16 @@ export async function chat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: sys }] },
-          contents: history.map((m) => ({
-            role: m.role === "assistant" ? "model" : "user",
-            parts: [{ text: m.content }],
-          })),
+          contents: history.map((m, i) => {
+            const parts = [{ text: m.content }];
+            // Focus mode only: re-sending every page image every turn would balloon tokens.
+            if (i === history.length - 1 && questions.length === 1)
+              for (const img of questions[0].images || []) {
+                parts.push({ text: "Image belonging to this question:" });
+                parts.push({ inline_data: { mime_type: img.mime, data: img.data } });
+              }
+            return { role: m.role === "assistant" ? "model" : "user", parts };
+          }),
         }),
       }
     );

@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Image-stem quiz fixture</title>
+<!--
+  Three questions:
+    Q1 — stem is an <img> WITH descriptive alt; options are plain TEXT labels.
+    Q2 — stem is an <img> with NO alt attribute at all.
+    Q3 — normal text-prompt question with a text input (control).
+
+  Expected: 3 questions; Q1's prompt is the stem alt, Q2's prompt is
+  exactly "[Question image]", and both stem images land in q.images.
+
+  The stems use inline base64 SVGs (width/height >= 50) so imagesIn() can
+  fetch them offline and does not drop them for being under 50x50.
+-->
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 12px; }
+  .q { margin: 26px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 6px; }
+  .q > img { display: block; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; margin-bottom: 10px; }
+  .q > p { font-weight: 600; margin-bottom: 10px; }
+  label { display: block; margin: 6px 0; cursor: pointer; }
+  input[type="text"] { padding: 6px 10px; border: 1px solid #bbb; border-radius: 4px; width: 260px; }
+</style>
+
+<h1>Week 5 : Assignment (image stems)</h1>
+
+<div class="q">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMTIwIj4KPHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmN2Y3ZjciLz4KPGxpbmUgeDE9IjIwMCIgeTE9IjMwIiB4Mj0iMTEwIiB5Mj0iNzUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSIyMDAiIHkxPSIzMCIgeDI9IjI5MCIgeTI9Ijc1IiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIyMDAiIGN5PSIzMCIgcj0iMTYiIGZpbGw9IiM0YTkwZDkiLz48dGV4dCB4PSIyMDAiIHk9IjM1IiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+OTA8L3RleHQ+CjxjaXJjbGUgY3g9IjExMCIgY3k9Ijc1IiByPSIxNiIgZmlsbD0iIzRhOTBkOSIvPjx0ZXh0IHg9IjExMCIgeT0iODAiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj43MDwvdGV4dD4KPGNpcmNsZSBjeD0iMjkwIiBjeT0iNzUiIHI9IjE2IiBmaWxsPSIjNGE5MGQ5Ii8+PHRleHQgeD0iMjkwIiB5PSI4MCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjgwPC90ZXh0Pgo8dGV4dCB4PSIxNCIgeT0iMTEyIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMzMzIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+bWF4LWhlYXA6IHBhcmVudCAmZ3Q7PSBjaGlsZHJlbjwvdGV4dD4KPC9zdmc+" alt="Max-heap property: every parent node holds a key greater than or equal to the keys of its children" width="400" height="120" />
+  <label><input type="radio" name="heapq" value="0" /> The root node holds the largest key in the heap</label>
+  <label><input type="radio" name="heapq" value="1" /> The root node holds the smallest key in the heap</label>
+  <label><input type="radio" name="heapq" value="2" /> Every leaf node holds the smallest key in the heap</label>
+  <label><input type="radio" name="heapq" value="3" /> The tree must be a complete binary tree</label>
+</div>
+
+<div class="q">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMTIwIj4KPHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNmN2Y3ZjciLz4KPGxpbmUgeDE9IjIwMCIgeTE9IjMwIiB4Mj0iMTQwIiB5Mj0iNzUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSIyMDAiIHkxPSIzMCIgeDI9IjI3MCIgeTI9Ijc1IiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8bGluZSB4MT0iMTQwIiB5MT0iNzUiIHgyPSI5MCIgeTI9IjEwNSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiLz4KPGNpcmNsZSBjeD0iMjAwIiBjeT0iMzAiIHI9IjE0IiBmaWxsPSIjNWFhMzVhIi8+PHRleHQgeD0iMjAwIiB5PSIzNSIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjUwPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNDAiIGN5PSI3NSIgcj0iMTQiIGZpbGw9IiM1YWEzNWEiLz48dGV4dCB4PSIxNDAiIHk9IjgwIiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+MzA8L3RleHQ+CjxjaXJjbGUgY3g9IjI3MCIgY3k9Ijc1IiByPSIxNCIgZmlsbD0iIzVhYTM1YSIvPjx0ZXh0IHg9IjI3MCIgeT0iODAiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj43MDwvdGV4dD4KPGNpcmNsZSBjeD0iOTAiIGN5PSIxMDUiIHI9IjEyIiBmaWxsPSIjNWFhMzVhIi8+PHRleHQgeD0iOTAiIHk9IjEwOSIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiPjIwPC90ZXh0Pgo8L3N2Zz4=" width="400" height="120" />
+  <label><input type="radio" name="bstq" value="0" /> The left subtree of every node holds only smaller keys</label>
+  <label><input type="radio" name="bstq" value="1" /> The right subtree of every node holds only larger keys</label>
+  <label><input type="radio" name="bstq" value="2" /> An in-order traversal yields the keys in sorted order</label>
+</div>
+
+<div class="q">
+  <p>3) In one sentence, explain how a priority queue decides which task to run next.</p>
+  <input type="text" name="blank3" placeholder="your answer" />
+</div>

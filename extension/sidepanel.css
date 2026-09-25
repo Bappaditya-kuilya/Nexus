@@ -195,6 +195,41 @@ input:focus, select:focus {
   background: var(--accent-glow);
 }
 
+/* --- first-run key setup ---------------------------------------- */
+#setup {
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.setup-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+
+.setup-hint { font-size: 13px; color: var(--fg-muted); margin-bottom: 12px; }
+
+.setup-row { display: flex; gap: 8px; }
+
+#setup-test {
+  flex-shrink: 0;
+  padding: 0 19px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#setup-test:hover { background: #e5683a; border-color: #e5683a; }
+
+.setup-msg { display: block; font-size: 13px; margin-top: 8px; color: var(--success); }
+
+.setup-msg:empty { display: none; }
+
+.setup-msg.err { color: var(--error); }
+
 /* --- mode toggle (pill segmented control) --------------------- */
 .seg {
   display: flex;
@@ -231,6 +266,30 @@ input:focus, select:focus {
   background: var(--primary);
   color: var(--primary-contrast);
   font-weight: 600;
+}
+
+/* --- list tools (sort) ------------------------------------------ */
+.list-tools { display: flex; justify-content: flex-end; margin: 8px 18px 0; }
+
+#sort-conf {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#sort-conf:hover { color: var(--fg); border-color: var(--muted); }
+
+#sort-conf[aria-pressed="true"] {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--accent-glow);
 }
 
 /* --- status --------------------------------------------------- */
@@ -357,7 +416,7 @@ input:focus, select:focus {
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
-  padding: 0 19px;
+  padding: 0 8px;
   height: 44px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);

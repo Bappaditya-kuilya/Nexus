@@ -233,6 +233,48 @@ test("image options: reads option text from img alt, not bare digits", async () 
   await page.close();
 });
 
+// ---------------------------------------------------------- image stem prompt
+
+test("image stem: prompt comes from the stem img alt, else [Question image]", async () => {
+  const page = await load("image-stem.html");
+  const { questions } = await extract(page);
+
+  assert.equal(questions.length, 3);
+
+  // Q1 — stem image carries descriptive alt text.
+  assert.equal(
+    questions[0].prompt,
+    "Max-heap property: every parent node holds a key greater than or equal to the keys of its children"
+  );
+  assert.ok(questions[0].prompt.length > 10, "Q1 prompt too short");
+
+  // Q2 — stem image has no alt at all.
+  assert.equal(questions[1].prompt, "[Question image]");
+
+  // The stem image must be captured for both (container-climb keeps it in range).
+  assert.ok(questions[0].images.length >= 1, "Q1 stem image was not captured");
+  assert.ok(questions[1].images.length >= 1, "Q2 stem image was not captured");
+
+  for (const q of questions)
+    assert.ok(q.prompt.length > 10, `prompt too short: ${JSON.stringify(q.prompt)}`);
+
+  // Control — the text prompt still reads as itself, options stay out of it.
+  assert.match(questions[2].prompt, /priority queue decides/);
+  assert.ok(
+    !questions[2].prompt.includes("largest key in the heap"),
+    "prompt leaked option text"
+  );
+
+  const results = await apply(page, [answer(questions[0], [1])]);
+  assert.ok(results.every((r) => r.ok), JSON.stringify(results));
+  const checked = await page.evaluate(
+    () => document.querySelector("input[name=heapq]:checked")?.value ?? null
+  );
+  assert.equal(checked, "1", "fill did not check the chosen heapq radio");
+
+  await page.close();
+});
+
 // ------------------------------------------------------------- SPA route swap
 
 test("SPA swap: re-discovers the replacement questions after the DOM mutates", async () => {
@@ -301,7 +343,7 @@ test("Chrome loads the unpacked extension without errors", async () => {
     assert.equal(await page.title(), "Nexus");
     assert.deepEqual(
       await page.$$eval("#actions button", (b) => b.map((x) => x.textContent)),
-      ["Scan page", "Answer", "Fill page"]
+      ["Scan page", "Answer", "Fill page", "Export"]
     );
     assert.deepEqual(errors, [], "sidepanel logged errors");
 

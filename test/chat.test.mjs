@@ -145,3 +145,47 @@ test("history passed through → request body includes prior user turns", async 
   assert.match(raw, /HISTORY_USER_MARKER/, "prior user turn missing from request body");
   assert.match(raw, /HISTORY_MODEL_MARKER/, "prior model turn missing from request body");
 });
+
+test("focus mode with an image question → image rides on the final user turn", async () => {
+  const focused = [
+    {
+      ...questions[0],
+      prompt: "[Question image]",
+      images: [{ mime: "image/png", data: "aGVsbG8=" }],
+    },
+  ];
+  route({
+    gemini: () => geminiText(GEMINI_REPLY),
+    groq: () => {
+      throw new Error("Groq must not be called on Gemini success");
+    },
+  });
+
+  await chat({ ...base, questions: focused });
+
+  const contents = geminiBody().contents;
+  const last = contents[contents.length - 1];
+  assert.equal(last.role, "user");
+  assert.ok(
+    last.parts.some((p) => p.inline_data?.mime_type === "image/png"),
+    `image missing from final turn: ${JSON.stringify(last.parts)}`
+  );
+});
+
+test("multi-question context → no images re-sent (text summary only)", async () => {
+  const both = [
+    { ...questions[0], images: [{ mime: "image/png", data: "aGVsbG8=" }] },
+    { ...questions[0], qid: "q2", images: [{ mime: "image/png", data: "aGVsbG8=" }] },
+  ];
+  route({
+    gemini: () => geminiText(GEMINI_REPLY),
+    groq: () => {
+      throw new Error("Groq must not be called on Gemini success");
+    },
+  });
+
+  await chat({ ...base, questions: both });
+
+  const raw = geminiCalls()[0].body;
+  assert.doesNotMatch(raw, /inline_data/, "whole-list chat must stay text-only");
+});
